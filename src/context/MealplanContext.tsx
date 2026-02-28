@@ -8,10 +8,16 @@ import { mockRecipes } from '../data/mockRecipes';
 interface MealplanContextType {
     activePlan: WeeklyPlan | null;
     checkedIngredients: string[];
+    likedRecipes: string[];
+    dislikedRecipes: string[];
+    favoriteRecipes: string[];
     createNewPlan: (onboardingPrefs: OnboardingData) => Promise<WeeklyPlan>;
     toggleCookedStatus: (dayIndex: number, mealSlotId: string, cooked: boolean) => void;
     toggleShoppingItem: (ingredientKey: string) => void;
     swapMeal: (dayIndex: number, mealSlotId: string) => void;
+    toggleLike: (recipeId: string) => void;
+    toggleDislike: (recipeId: string) => void;
+    toggleFavorite: (recipeId: string) => void;
 }
 
 const MealplanContext = createContext<MealplanContextType | undefined>(undefined);
@@ -19,6 +25,11 @@ const MealplanContext = createContext<MealplanContextType | undefined>(undefined
 export function MealplanProvider({ children }: { children: React.ReactNode }) {
     const [activePlan, setActivePlan] = useState<WeeklyPlan | null>(null);
     const [checkedIngredients, setCheckedIngredients] = useState<string[]>([]);
+
+    // Feedback States MVP (These would normally be persisted in the backend)
+    const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
+    const [dislikedRecipes, setDislikedRecipes] = useState<string[]>([]);
+    const [favoriteRecipes, setFavoriteRecipes] = useState<string[]>([]);
 
     const createNewPlan = async (prefs: OnboardingData) => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -60,7 +71,8 @@ export function MealplanProvider({ children }: { children: React.ReactNode }) {
             const meal = day.meals.find(m => m.id === mealSlotId);
             if (meal) {
                 // Simple MVP swap: pick a random recipe that isn't the current one
-                const alternatives = mockRecipes.filter(r => r.id !== meal.recipe.id);
+                // Ensure we don't pick disliked recipes if we were doing deep filtering
+                const alternatives = mockRecipes.filter(r => r.id !== meal.recipe.id && !dislikedRecipes.includes(r.id));
                 if (alternatives.length > 0) {
                     const randomAlt = alternatives[Math.floor(Math.random() * alternatives.length)];
                     meal.recipe = randomAlt;
@@ -69,19 +81,44 @@ export function MealplanProvider({ children }: { children: React.ReactNode }) {
             }
         }
         setActivePlan(updatedPlan);
+    };
 
-        // When swapping, the shopping list will automatically re-calculate. 
-        // We could selectively uncheck items here, but clearing is easier for MVP.
+    const toggleLike = (recipeId: string) => {
+        setLikedRecipes((prev) => {
+            if (prev.includes(recipeId)) return prev.filter((id) => id !== recipeId); // Unlike
+            setDislikedRecipes((dis) => dis.filter((id) => id !== recipeId)); // Remove from dislike
+            return [...prev, recipeId]; // Add like
+        });
+    };
+
+    const toggleDislike = (recipeId: string) => {
+        setDislikedRecipes((prev) => {
+            if (prev.includes(recipeId)) return prev.filter((id) => id !== recipeId); // Undislike
+            setLikedRecipes((lik) => lik.filter((id) => id !== recipeId)); // Remove from like
+            return [...prev, recipeId]; // Add dislike
+        });
+    };
+
+    const toggleFavorite = (recipeId: string) => {
+        setFavoriteRecipes((prev) =>
+            prev.includes(recipeId) ? prev.filter((id) => id !== recipeId) : [...prev, recipeId]
+        );
     };
 
     return (
         <MealplanContext.Provider value={{
             activePlan,
             checkedIngredients,
+            likedRecipes,
+            dislikedRecipes,
+            favoriteRecipes,
             createNewPlan,
             toggleCookedStatus,
             toggleShoppingItem,
-            swapMeal
+            swapMeal,
+            toggleLike,
+            toggleDislike,
+            toggleFavorite
         }}>
             {children}
         </MealplanContext.Provider>

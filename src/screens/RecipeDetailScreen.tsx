@@ -8,10 +8,22 @@ import { MealSlot } from '../types/mealplan';
 export default function RecipeDetailScreen() {
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
-    const { toggleCookedStatus } = useMealplan();
+    const {
+        toggleCookedStatus,
+        likedRecipes,
+        dislikedRecipes,
+        favoriteRecipes,
+        toggleLike,
+        toggleDislike,
+        toggleFavorite
+    } = useMealplan();
 
     const { dayIndex, mealSlot }: { dayIndex: number, mealSlot: MealSlot } = route.params;
     const { recipe } = mealSlot;
+
+    const isLiked = likedRecipes.includes(recipe.id);
+    const isDisliked = dislikedRecipes.includes(recipe.id);
+    const isFavorite = favoriteRecipes.includes(recipe.id);
 
     const handleToggleCooked = () => {
         toggleCookedStatus(dayIndex, mealSlot.id, !mealSlot.cooked);
@@ -25,12 +37,24 @@ export default function RecipeDetailScreen() {
                     <Ionicons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Rezept</Text>
-                <View style={{ width: 24 }} />
+                <TouchableOpacity style={styles.favoriteButton} onPress={() => toggleFavorite(recipe.id)}>
+                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? "#FA4A0C" : "#333"} />
+                </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.scrollArea}>
                 <View style={styles.content}>
-                    <Text style={styles.title}>{recipe.title}</Text>
+                    <View style={styles.titleRow}>
+                        <Text style={styles.title}>{recipe.title}</Text>
+                        <View style={styles.feedbackContainer}>
+                            <TouchableOpacity style={[styles.feedbackButton, isLiked && styles.feedbackActiveLike]} onPress={() => toggleLike(recipe.id)}>
+                                <Ionicons name={isLiked ? "thumbs-up" : "thumbs-up-outline"} size={20} color={isLiked ? "#FFF" : "#666"} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.feedbackButton, isDisliked && styles.feedbackActiveDislike]} onPress={() => toggleDislike(recipe.id)}>
+                                <Ionicons name={isDisliked ? "thumbs-down" : "thumbs-down-outline"} size={20} color={isDisliked ? "#FFF" : "#666"} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                     <Text style={styles.description}>{recipe.description}</Text>
 
                     <View style={styles.metaContainer}>
@@ -96,9 +120,15 @@ const styles = StyleSheet.create({
     header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
     backButton: { padding: 8 },
     headerTitle: { fontSize: 18, fontWeight: '600', color: '#333' },
+    favoriteButton: { padding: 8 },
     scrollArea: { flex: 1 },
     content: { padding: 24 },
-    title: { fontSize: 32, fontWeight: '800', color: '#111', marginBottom: 8 },
+    titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
+    title: { flex: 1, fontSize: 32, fontWeight: '800', color: '#111', marginRight: 16 },
+    feedbackContainer: { flexDirection: 'row', gap: 8 },
+    feedbackButton: { padding: 10, backgroundColor: '#F0F0F0', borderRadius: 20 },
+    feedbackActiveLike: { backgroundColor: '#4CAF50' },
+    feedbackActiveDislike: { backgroundColor: '#F44336' },
     description: { fontSize: 16, color: '#666', lineHeight: 24, marginBottom: 16 },
     metaContainer: { flexDirection: 'row', gap: 12, marginBottom: 32 },
     metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF5F0', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
