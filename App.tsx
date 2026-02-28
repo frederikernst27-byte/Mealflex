@@ -5,7 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { supabase } from './lib/supabase';
 import AuthScreen from './AuthScreen';
 import OnboardingNavigator from './src/navigation/OnboardingNavigator';
-import HomeScreen from './src/screens/HomeScreen';
+import MainTabNavigator from './src/navigation/MainTabNavigator';
+import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
 import { MealplanProvider } from './src/context/MealplanContext';
 
 const Stack = createNativeStackNavigator();
@@ -44,7 +45,8 @@ export default function App() {
                     ) : (
                         <>
                             <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-                            <Stack.Screen name="MainHome" component={HomeScreen} options={{ gestureEnabled: false }} />
+                            <Stack.Screen name="MainHome" component={MainTabNavigator} options={{ gestureEnabled: false }} />
+                            <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} options={{ presentation: 'modal' }} />
                         </>
                     )}
                 </Stack.Navigator>
