@@ -6,6 +6,7 @@ import { supabase } from './lib/supabase';
 import AuthScreen from './AuthScreen';
 import OnboardingNavigator from './src/navigation/OnboardingNavigator';
 import HomeScreen from './src/screens/HomeScreen';
+import { MealplanProvider } from './src/context/MealplanContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,23 +36,20 @@ export default function App() {
     }
 
     return (
-        <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-                {!session ? (
-                    <Stack.Screen name="Auth" component={AuthScreen} />
-                ) : (
-                    <>
-                        {/* 
-              By default, after login the user goes to Onboarding. 
-              Once the profile/onboarding_completed flag is grabbed from backend, 
-              we can skip this straight to MainHome if they already finished it.
-            */}
-                        <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-                        <Stack.Screen name="MainHome" component={HomeScreen} options={{ gestureEnabled: false }} />
-                    </>
-                )}
-            </Stack.Navigator>
-        </NavigationContainer>
+        <MealplanProvider>
+            <NavigationContainer>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    {!session ? (
+                        <Stack.Screen name="Auth" component={AuthScreen} />
+                    ) : (
+                        <>
+                            <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
+                            <Stack.Screen name="MainHome" component={HomeScreen} options={{ gestureEnabled: false }} />
+                        </>
+                    )}
+                </Stack.Navigator>
+            </NavigationContainer>
+        </MealplanProvider>
     );
 }
 
