@@ -22,6 +22,12 @@ export default function HomeScreen() {
                 {!activePlan ? (
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>Es wurde noch kein Plan generiert.</Text>
+                        <TouchableOpacity
+                            style={styles.primaryButton}
+                            onPress={() => navigation.navigate('Onboarding')}
+                        >
+                            <Text style={styles.primaryButtonText}>Onboarding neu starten</Text>
+                        </TouchableOpacity>
                     </View>
                 ) : (
                     activePlan.days.map((day) => (
@@ -74,7 +80,9 @@ const styles = StyleSheet.create({
     scrollArea: { flex: 1 },
     scrollContent: { padding: 20 },
     emptyContainer: { padding: 40, alignItems: 'center', justifyContent: 'center' },
-    emptyText: { color: '#888', fontSize: 16 },
+    emptyText: { color: '#888', fontSize: 16, marginBottom: 20 },
+    primaryButton: { backgroundColor: '#FA4A0C', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12 },
+    primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
     dayCard: {
         backgroundColor: '#FFF',
         borderRadius: 16,

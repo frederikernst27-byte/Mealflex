@@ -36,8 +36,11 @@ export const generateMealPlan = (userId: string, prefs: OnboardingData): WeeklyP
     });
 
     // Falls keine nach den strikten Filtern übrig bleiben, nehmen wir einfach alle MockRezepte (Fallback für MVP)
-    const pool = availableRecipes.length >= 2 ? availableRecipes : mockRecipes;
-
+    let pool = availableRecipes;
+    if (pool.length === 0) {
+        // Logik für MVP: Notfall-Fallback, damit der User zumindest Rezepte zum Testen hat
+        pool = mockRecipes;
+    }
     // 2. ALLOCATION (T14 - Mealprep vs Daily Logik)
     const days: DayPlan[] = [];
     const weekDays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
