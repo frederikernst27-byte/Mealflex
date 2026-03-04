@@ -78,6 +78,18 @@
 - [ ] E13-T08 Empfehlungslogik um Saved-Signale erweitern (`saved_at`, `save_count`, `personal_save_boost`)
 - [ ] E13-T09 Analytics Events für Community-Funnel (`view_feed`, `save_recipe`, `add_to_swap`, `swap_pick`)
 - [ ] E13-T10 QA: End-to-End „Community finden -> speichern -> im Swap auswählen -> Mealplan ersetzen"
+- [ ] E13-T11 Foto-Upload für Community-Rezepte (Supabase Storage + Bild-URL in `recipes`)
+  - [ ] Upload-Komponente in Upload-Flow (Kamera/Galerie)
+  - [ ] Storage Bucket + Public/Signed URL-Strategie
+  - [ ] Bild-Preview in Feed, Detailansicht und Saved-Rezepte
+  - [ ] Fallback-Placeholder bei fehlendem Bild
+  - [ ] Basic Validierung (Format/Größe) + Fehlerhandling
+- [ ] E13-T12 Smart-Suche mit Autosuggest für Cuisine/Diet/Goal
+  - [ ] Typeahead-Vorschläge während Eingabe anzeigen
+  - [ ] Vorschlags-Chips: `cut`, `bulk`, `healthy`, `keto`, `vegan`, `high-protein`, typische Cuisines
+  - [ ] Klick auf Vorschlag setzt sofort aktive Filter
+  - [ ] Ranking: exakte Treffer vor Teiltreffer
+  - [ ] Debounce + Empty-State „keine Vorschläge gefunden"
 
 ---
 
@@ -89,3 +101,4 @@
 - 2026-03-04: EPIC 11 umgesetzt: Swap-Engine (Goal/Style/Allergie/Like-Dislike-Filter), Tinder-ähnlicher Swap-Flow auf Home, persistentes Swap-Commit (`meal_plan_items`), Feedback-Signale (`recipe_swap_feedback`) und QA-Testfälle ergänzt.
 - 2026-03-04: EPIC 12 ergänzt: Community-Rezeptdatenbank inkl. Upload-Flow, Moderation, UGC-Empfehlungslogik, Suche/Filter, RLS und Rollout-Tickets geplant.
 - 2026-03-04: EPIC 13 ergänzt: Community-First UX mit Save-to-Swap Flow, damit User zuerst passende Rezepte entdecken/speichern und diese priorisiert im Swap nutzen können.
+- 2026-03-04: EPIC 13 ausführlich erweitert: Foto-Upload (Storage + Feed-Preview) und Smart-Suche mit Autosuggest für Cuisine/Diet/Goal (`cut`, `bulk`, etc.).
