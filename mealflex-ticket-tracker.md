@@ -45,16 +45,27 @@
 - [x] Opt-in/Opt-out + Transparenztext „Coach nutzt deine Daten“
 
 ## EPIC 11 – Rezept-Swap als Tinder-Swipe
-- [ ] UX-Konzept: „Swap“-Flow auf Tageskarte definieren (Button + Swipe-Deck + Confirm)
-- [ ] Datenmodell für Swap-Kandidaten festlegen (pro Tag, Goal, Allergien, Zeitbudget, Likes/Dislikes)
-- [ ] API/Generator erweitern: 5–10 alternative Rezepte pro Slot vorschlagen
-- [ ] UI: Swipe-Deck (links = verwerfen, rechts = auswählen) implementieren
-- [ ] CTA auf Home/Meal-Card: „Swap“ Button integrieren
-- [ ] Auswahl-Commit: gewähltes Rezept ersetzt Tagesrezept persistent in `meal_plan_items`
-- [ ] Shoppingliste nach Swap automatisch neu berechnen
-- [ ] Feedback-Loop: Swipe-Entscheidung als Preference-Signal speichern
-- [ ] Edge Cases: keine Alternativen, Allergie-Konflikte, bereits gekocht
-- [ ] QA: Swipe-Happy-Path + Persistenz + Offline/Reload Tests
+- [x] UX-Konzept: „Swap“-Flow auf Tageskarte definieren (Button + Swipe-Deck + Confirm)
+- [x] Datenmodell für Swap-Kandidaten festlegen (pro Tag, Goal, Allergien, Zeitbudget, Likes/Dislikes)
+- [x] API/Generator erweitern: 5–10 alternative Rezepte pro Slot vorschlagen
+- [x] UI: Swipe-Deck (links = verwerfen, rechts = auswählen) implementieren
+- [x] CTA auf Home/Meal-Card: „Swap“ Button integrieren
+- [x] Auswahl-Commit: gewähltes Rezept ersetzt Tagesrezept persistent in `meal_plan_items`
+- [x] Shoppingliste nach Swap automatisch neu berechnen
+- [x] Feedback-Loop: Swipe-Entscheidung als Preference-Signal speichern
+- [x] Edge Cases: keine Alternativen, Allergie-Konflikte, bereits gekocht
+- [x] QA: Swipe-Happy-Path + Persistenz + Offline/Reload Tests
+
+## EPIC 12 – Community Recipe Database & UGC Recommendations
+- [ ] E12-T01 Datenmodell für UGC-Rezepte (`recipes`, `recipe_ingredients`, `recipe_steps`, `recipe_tags`, `recipe_ratings`)
+- [ ] E12-T02 Upload-Flow „Rezept hinzufügen“ (UI + Validierung + Persistenz)
+- [ ] E12-T03 Moderation/Qualität (Status: draft/pending/approved/rejected + Duplikatcheck)
+- [ ] E12-T04 Recommendation Engine v2 mit UGC-Pool (Profil/Fit/Allergie/Zeit/Feedback)
+- [ ] E12-T05 Swap-Integration mit UGC-Alternativen (inkl. persistentes Replace)
+- [ ] E12-T06 Feedback-Loop für UGC (Like/Dislike/Rating -> Ranking)
+- [ ] E12-T07 Rezeptsuche & Filter (Titel/Zutat/Tags, Zeit, kcal, cuisine, diet)
+- [ ] E12-T08 Security/RLS für eigene Drafts vs. public approved Rezepte
+- [ ] E12-T09 QA + Seed + Rollout (Testdaten, E2E, Feature Flag)
 
 ---
 
@@ -63,3 +74,5 @@
 - 2026-02-28: EPIC 2–8 technisch umgesetzt: Onboarding-Persistenz, Mealplan-/Shopping-/Feedback-Persistenz (Supabase) und UI-Hydration ergänzt.
 - 2026-03-02: EPIC 9 gestartet: Analytics-Event-Pipeline ergänzt (`analytics_events` + Client-Tracking), QA-Testplan erstellt (`qa-testplan-mvp.md`), RC-Checkliste/Build-Runbook erstellt (`release-candidate-mvp.md`).
 - 2026-03-02: EPIC 10 umgesetzt: KI-Coach Screen + Tab, regelbasierte Coach-Engine, Weekly Summary, Opt-in/Opt-out, Safety-Guardrails, Supabase-Verlauf (`coach_interactions`) und Konzeptdokument (`epic10-ki-coach-konzept.md`).
+- 2026-03-04: EPIC 11 umgesetzt: Swap-Engine (Goal/Style/Allergie/Like-Dislike-Filter), Tinder-ähnlicher Swap-Flow auf Home, persistentes Swap-Commit (`meal_plan_items`), Feedback-Signale (`recipe_swap_feedback`) und QA-Testfälle ergänzt.
+- 2026-03-04: EPIC 12 ergänzt: Community-Rezeptdatenbank inkl. Upload-Flow, Moderation, UGC-Empfehlungslogik, Suche/Filter, RLS und Rollout-Tickets geplant.
