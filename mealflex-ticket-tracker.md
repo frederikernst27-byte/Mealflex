@@ -67,6 +67,18 @@
 - [ ] E12-T08 Security/RLS für eigene Drafts vs. public approved Rezepte
 - [ ] E12-T09 QA + Seed + Rollout (Testdaten, E2E, Feature Flag)
 
+## EPIC 13 – Community-First UX & Save-to-Swap Flow
+- [ ] E13-T01 Community als Einstieg redesignen: zuerst Feed/Grid mit Rezeptkarten statt Upload-Form im Fokus
+- [ ] E13-T02 Rezeptkarten mit Quick-Actions: „Speichern“, „Gefällt mir“, „Details“, „Für Swap merken“
+- [ ] E13-T03 Saved-Rezepte Bereich bauen (eigener Tab/Section), inkl. Filter (goal/style/tags)
+- [ ] E13-T04 Swap-Engine priorisiert gespeicherte Community-Rezepte vor generischen Alternativen
+- [ ] E13-T05 „Zu Swap hinzufügen“ Flow beim Upload integrieren (optional direkt nach Einreichung)
+- [ ] E13-T06 Upload-Form UX vereinfachen (Schritt-für-Schritt, klare Labels, bessere Reihenfolge)
+- [ ] E13-T07 Empty/Loading/Error States für Community und Saved sauber gestalten
+- [ ] E13-T08 Empfehlungslogik um Saved-Signale erweitern (`saved_at`, `save_count`, `personal_save_boost`)
+- [ ] E13-T09 Analytics Events für Community-Funnel (`view_feed`, `save_recipe`, `add_to_swap`, `swap_pick`)
+- [ ] E13-T10 QA: End-to-End „Community finden -> speichern -> im Swap auswählen -> Mealplan ersetzen"
+
 ---
 
 ## Änderungslog
@@ -76,3 +88,4 @@
 - 2026-03-02: EPIC 10 umgesetzt: KI-Coach Screen + Tab, regelbasierte Coach-Engine, Weekly Summary, Opt-in/Opt-out, Safety-Guardrails, Supabase-Verlauf (`coach_interactions`) und Konzeptdokument (`epic10-ki-coach-konzept.md`).
 - 2026-03-04: EPIC 11 umgesetzt: Swap-Engine (Goal/Style/Allergie/Like-Dislike-Filter), Tinder-ähnlicher Swap-Flow auf Home, persistentes Swap-Commit (`meal_plan_items`), Feedback-Signale (`recipe_swap_feedback`) und QA-Testfälle ergänzt.
 - 2026-03-04: EPIC 12 ergänzt: Community-Rezeptdatenbank inkl. Upload-Flow, Moderation, UGC-Empfehlungslogik, Suche/Filter, RLS und Rollout-Tickets geplant.
+- 2026-03-04: EPIC 13 ergänzt: Community-First UX mit Save-to-Swap Flow, damit User zuerst passende Rezepte entdecken/speichern und diese priorisiert im Swap nutzen können.
