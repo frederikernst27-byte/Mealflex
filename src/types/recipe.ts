@@ -1,6 +1,6 @@
 export type NutritionGoal = 'cut' | 'muscle' | 'healthy';
 export type CookingStyle = 'mealprep' | 'daily';
-export type Unit = 'g' | 'ml' | 'stk' | 'tl' | 'el' | 'prise' | 'zehe';
+export type Unit = 'g' | 'ml' | 'stk' | 'tl' | 'el' | 'prise' | 'zehe' | 'dose' | 'scheibe' | 'bund';
 
 export interface Macros {
     protein: number;
@@ -12,20 +12,27 @@ export interface RecipeIngredient {
     name: string;
     amount: number;
     unit: Unit;
-    originalName?: string; // e.g. "Rote Paprika" mapped to normalized "Paprika"
+    originalName?: string;
 }
 
 export interface Recipe {
     id: string;
     title: string;
     description: string;
-    prepTime: number; // in minutes
+    prepTime: number;
     portions: number;
     ingredients: RecipeIngredient[];
     steps: string[];
     calories: number;
     macros: Macros;
-    tags: string[]; // e.g., 'vegan', 'high-protein', 'low-carb', etc.
+    tags: string[];
     suitableGoals: NutritionGoal[];
     suitableStyles: CookingStyle[];
+    imageUrl?: string;
+    source?: 'mock' | 'community';
+    authorId?: string;
+    authorName?: string;
+    cuisine?: string;
+    rating?: number;
+    ratingCount?: number;
 }
