@@ -12,7 +12,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "MealFlex braucht Kamera-Zugriff, um Rezept-Fotos aufzunehmen.",
+        "NSPhotoLibraryUsageDescription": "MealFlex braucht Galerie-Zugriff, um Rezept-Fotos auszuwählen.",
+        "NSPhotoLibraryAddUsageDescription": "MealFlex speichert Fotos in deiner Galerie."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,8 +26,23 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MealFlex möchte auf deine Fotos zugreifen, um Rezept-Bilder hinzuzufügen.",
+          "cameraPermission": "MealFlex möchte deine Kamera nutzen, um Rezept-Fotos aufzunehmen."
+        }
+      ],
+      "react-native-reanimated"
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

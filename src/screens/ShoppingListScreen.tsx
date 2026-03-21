@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Share, Alert } from 'react-native';
 import { useMealplan } from '../context/MealplanContext';
 import { aggregateShoppingList } from '../utils/ingredientParser';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +19,27 @@ export default function ShoppingListScreen() {
     const progress = shoppingList.length === 0 ? 0 :
         (checkedIngredients.length / shoppingList.length) * 100;
 
+    const handleBringExport = async () => {
+        const unchecked = shoppingList.filter(
+            item => !checkedIngredients.includes(`${item.name}-${item.unit}`)
+        );
+        if (unchecked.length === 0) {
+            Alert.alert('Alles erledigt! ✅', 'Alle Artikel sind bereits abgehakt.');
+            return;
+        }
+        const text = unchecked
+            .map(item => `• ${item.amount} ${item.unit} ${item.name}`)
+            .join('\n');
+        try {
+            await Share.share({
+                message: `🛒 MealFlex Einkaufsliste\n\n${text}`,
+                title: 'MealFlex Einkaufsliste',
+            });
+        } catch {
+            Alert.alert('Fehler', 'Export konnte nicht gestartet werden.');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.header}>
@@ -35,6 +56,10 @@ export default function ShoppingListScreen() {
                     <View style={styles.progressTrack}>
                         <View style={[styles.progressFill, { width: `${progress}%` }]} />
                     </View>
+                    <TouchableOpacity style={styles.bringBtn} onPress={handleBringExport}>
+                        <Ionicons name="cart" size={16} color="#FFF" />
+                        <Text style={styles.bringBtnText}>Zu Bring! exportieren</Text>
+                    </TouchableOpacity>
                 </View>
             )}
 
@@ -82,7 +107,13 @@ const styles = StyleSheet.create({
     header: { padding: 24, paddingBottom: 16, backgroundColor: '#FFF' },
     title: { fontSize: 32, fontWeight: '800', color: '#FA4A0C' },
     subtitle: { fontSize: 16, color: '#666', marginTop: 4, fontWeight: '500' },
-    progressContainer: { backgroundColor: '#FFF', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+    progressContainer: { backgroundColor: '#FFF', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0', gap: 12 },
+    bringBtn: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+        backgroundColor: '#FA4A0C', paddingVertical: 12, borderRadius: 20,
+        shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+    },
+    bringBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
     progressTrack: { height: 8, backgroundColor: '#EFEFEF', borderRadius: 4, overflow: 'hidden' },
     progressFill: { height: '100%', backgroundColor: '#4CAF50', borderRadius: 4 },
     scrollArea: { flex: 1 },

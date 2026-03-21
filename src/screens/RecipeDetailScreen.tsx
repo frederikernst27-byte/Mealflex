@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useMealplan } from '../context/MealplanContext';
+import { useCalorie } from '../context/CalorieContext';
 import { Ionicons } from '@expo/vector-icons';
 import { MealSlot } from '../types/mealplan';
 
@@ -25,9 +26,49 @@ export default function RecipeDetailScreen() {
     const isDisliked = dislikedRecipes.includes(recipe.id);
     const isFavorite = favoriteRecipes.includes(recipe.id);
 
+    const { addLog } = useCalorie();
+
     const handleToggleCooked = () => {
-        toggleCookedStatus(dayIndex, mealSlot.id, !mealSlot.cooked);
-        navigation.goBack();
+        const newCooked = !mealSlot.cooked;
+        toggleCookedStatus(dayIndex, mealSlot.id, newCooked);
+
+        // E14-T09: Auto-import Kalorien wenn als gekocht markiert
+        if (newCooked && recipe.calories > 0) {
+            Alert.alert(
+                '🍽️ In Tracker übernehmen?',
+                `Möchtest du "${recipe.title}" (${recipe.calories} kcal) automatisch in deinen Kalorien-Tracker eintragen?`,
+                [
+                    { text: 'Nein', style: 'cancel', onPress: () => navigation.goBack() },
+                    {
+                        text: 'Ja, eintragen',
+                        onPress: () => {
+                            addLog({
+                                log_date: new Date().toISOString().split('T')[0],
+                                meal_type: 'lunch',
+                                raw_text: recipe.title,
+                                parsed_foods: [{
+                                    name: recipe.title,
+                                    amount_g: 0,
+                                    kcal: recipe.calories,
+                                    protein: recipe.macros.protein,
+                                    carbs: recipe.macros.carbs,
+                                    fat: recipe.macros.fat,
+                                    iron: 0,
+                                }],
+                                total_kcal: recipe.calories,
+                                total_protein_g: recipe.macros.protein,
+                                total_carbs_g: recipe.macros.carbs,
+                                total_fat_g: recipe.macros.fat,
+                                total_iron_mg: 0,
+                            });
+                            navigation.goBack();
+                        },
+                    },
+                ]
+            );
+        } else {
+            navigation.goBack();
+        }
     };
 
     return (

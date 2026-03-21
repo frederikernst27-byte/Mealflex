@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { supabase } from './lib/supabase';
@@ -7,9 +8,74 @@ import AuthScreen from './AuthScreen';
 import OnboardingNavigator from './src/navigation/OnboardingNavigator';
 import MainTabNavigator from './src/navigation/MainTabNavigator';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
-import { MealplanProvider } from './src/context/MealplanContext';
+import { MealplanProvider, useMealplan } from './src/context/MealplanContext';
+import { CommunityProvider } from './src/context/CommunityContext';
+import { CalorieProvider } from './src/context/CalorieContext';
 
 const Stack = createNativeStackNavigator();
+
+// Innere Komponente, die Zugriff auf MealplanContext hat
+function AppNavigator({ session }: { session: any }) {
+    const { loadPlanFromDb, isLoadingPlan } = useMealplan();
+    const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        if (!session?.user) return;
+        checkOnboardingAndLoadPlan(session.user.id);
+    }, [session]);
+
+    const checkOnboardingAndLoadPlan = async (userId: string) => {
+        try {
+            // Profil in DB prüfen
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('onboarding_completed')
+                .eq('id', userId)
+                .maybeSingle();
+
+            const done = profile?.onboarding_completed === true;
+            setOnboardingDone(done);
+
+            // Falls Onboarding abgeschlossen: Plan aus DB laden
+            if (done) {
+                await loadPlanFromDb(userId);
+            }
+        } catch (e) {
+            console.error('checkOnboarding error:', e);
+            setOnboardingDone(false);
+        }
+    };
+
+    // Ladeindikator während DB-Check
+    if (onboardingDone === null || (onboardingDone && isLoadingPlan)) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FA4A0C" />
+                <Text style={styles.loadingText}>Dein Plan wird geladen…</Text>
+            </View>
+        );
+    }
+
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {onboardingDone ? (
+                // Onboarding bereits erledigt → direkt zum Plan
+                <>
+                    <Stack.Screen name="MainHome" component={MainTabNavigator} options={{ gestureEnabled: false }} />
+                    <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} options={{ presentation: 'modal' }} />
+                    <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
+                </>
+            ) : (
+                // Onboarding noch nicht gemacht
+                <>
+                    <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
+                    <Stack.Screen name="MainHome" component={MainTabNavigator} options={{ gestureEnabled: false }} />
+                    <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} options={{ presentation: 'modal' }} />
+                </>
+            )}
+        </Stack.Navigator>
+    );
+}
 
 export default function App() {
     const [session, setSession] = useState<any>(null);
@@ -37,29 +103,31 @@ export default function App() {
     }
 
     return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <MealplanProvider>
-            <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <CommunityProvider>
+                <CalorieProvider>
+                <NavigationContainer>
                     {!session ? (
-                        <Stack.Screen name="Auth" component={AuthScreen} />
+                        <Stack.Navigator screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="Auth" component={AuthScreen} />
+                        </Stack.Navigator>
                     ) : (
-                        <>
-                            <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-                            <Stack.Screen name="MainHome" component={MainTabNavigator} options={{ gestureEnabled: false }} />
-                            <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} options={{ presentation: 'modal' }} />
-                        </>
+                        <AppNavigator session={session} />
                     )}
-                </Stack.Navigator>
-            </NavigationContainer>
+                </NavigationContainer>
+                </CalorieProvider>
+            </CommunityProvider>
         </MealplanProvider>
+        </GestureHandlerRootView>
     );
 }
 
 const styles = StyleSheet.create({
     loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FFF'
+        flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF', gap: 16,
+    },
+    loadingText: {
+        fontSize: 15, color: '#999',
     },
 });
