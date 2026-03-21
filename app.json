@@ -41,7 +41,6 @@
           "cameraPermission": "MealFlex möchte deine Kamera nutzen, um Rezept-Fotos aufzunehmen."
         }
       ],
-      "react-native-reanimated"
     ],
     "web": {
       "favicon": "./assets/favicon.png"
