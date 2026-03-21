@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert, Share } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useMealplan } from '../context/MealplanContext';
 import { useCalorie } from '../context/CalorieContext';
@@ -27,6 +27,14 @@ export default function RecipeDetailScreen() {
     const isFavorite = favoriteRecipes.includes(recipe.id);
 
     const { addLog } = useCalorie();
+
+    const handleShareIngredients = async () => {
+        const lines = recipe.ingredients.map(ing => `• ${ing.amount} ${ing.unit} ${ing.name}`).join('\n');
+        await Share.share({
+            message: `🛒 Zutaten für „${recipe.title}" (${recipe.portions} Portion)\n\n${lines}`,
+            title: recipe.title,
+        });
+    };
 
     const handleToggleCooked = () => {
         const newCooked = !mealSlot.cooked;
@@ -142,13 +150,17 @@ export default function RecipeDetailScreen() {
             </ScrollView>
 
             <View style={styles.footerAction}>
+                <TouchableOpacity style={styles.shareButton} onPress={handleShareIngredients}>
+                    <Ionicons name="cart-outline" size={20} color="#FA4A0C" />
+                    <Text style={styles.shareButtonText}>Zutaten teilen</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.primaryButton, mealSlot.cooked && styles.cookedButton]}
+                    style={[styles.primaryButton, mealSlot.cooked && styles.cookedButton, { flex: 1, marginLeft: 12 }]}
                     onPress={handleToggleCooked}
                 >
                     <Ionicons name={mealSlot.cooked ? "checkmark-done-circle" : "checkmark-circle-outline"} size={22} color="#FFF" />
                     <Text style={styles.primaryButtonText}>
-                        {mealSlot.cooked ? 'Als ungekocht markieren' : 'Als gekocht markieren'}
+                        {mealSlot.cooked ? 'Ungekocht' : 'Gekocht'}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -188,8 +200,10 @@ const styles = StyleSheet.create({
     macroCard: { alignItems: 'center' },
     macroValue: { fontSize: 20, fontWeight: '800', color: '#333' },
     macroLabel: { fontSize: 12, color: '#888', textTransform: 'uppercase', marginTop: 4 },
-    footerAction: { padding: 24, backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-    primaryButton: { backgroundColor: '#FA4A0C', flexDirection: 'row', borderRadius: 14, padding: 18, alignItems: 'center', justifyContent: 'center', shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+    footerAction: { flexDirection: 'row', padding: 16, backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#F0F0F0', alignItems: 'center' },
+    shareButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 14, borderWidth: 1.5, borderColor: '#FA4A0C', backgroundColor: '#FFF5F0' },
+    shareButtonText: { color: '#FA4A0C', fontWeight: '700', fontSize: 14 },
+    primaryButton: { backgroundColor: '#FA4A0C', flexDirection: 'row', borderRadius: 14, padding: 16, alignItems: 'center', justifyContent: 'center', shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
     cookedButton: { backgroundColor: '#4CAF50', shadowColor: '#4CAF50' },
-    primaryButtonText: { color: '#FFF', fontSize: 18, fontWeight: '700', marginLeft: 10 },
+    primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '700', marginLeft: 8 },
 });

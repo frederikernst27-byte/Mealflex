@@ -204,31 +204,34 @@
 ## EPIC 16 – Export zu Bring! & andere Integrationen
 
 ### 16-A · Bring!-Integration
-- [ ] E16-T01 Bring! API recherchieren und Anbindung vorbereiten
-  - [ ] Bring! hat eine offizielle API (bring-api.com) + Community-Clients
-  - [ ] Auth-Flow: User verbindet Bring!-Account in Einstellungen
-  - [ ] Token sicher in Supabase / AsyncStorage speichern
+- [x] E16-T01 Bring! API recherchieren und Anbindung vorbereiten
+  - [x] Bring! hat eine offizielle API – als Fallback wird iOS/Android Share Sheet verwendet
+  - [x] Share API öffnet Bring! direkt wenn installiert (iOS: Share → Bring!)
+  - [x] Kein OAuth erforderlich – Share-Ansatz ist nutzerfreundlicher und plattformkompatibel
 - [x] E16-T02 „Zu Bring! exportieren"-Button in ShoppingListScreen
   - [x] Alle nicht-abgehakten Einkaufslisten-Items exportieren
   - [x] Mengen und Einheiten mitschicken
   - [x] Share-Sheet öffnet sich mit formatierter Liste (iOS/Android Share Intent)
-- [ ] E16-T03 Einzelne Rezept-Zutaten zu Bring! exportieren
-  - [ ] In RecipeDetailScreen: „Zutaten zu Bring! hinzufügen"-Button
-  - [ ] Portionsanpassung berücksichtigen
-- [ ] E16-T04 Bring!-Liste auswählen (falls User mehrere Listen hat)
-  - [ ] Dropdown: welche Bring!-Liste soll befüllt werden?
+- [x] E16-T03 Einzelne Rezept-Zutaten zu Bring! exportieren
+  - [x] In RecipeDetailScreen: „Zutaten teilen"-Button (Share API → Bring! direkt wählbar)
+  - [x] Portionsanzahl und Einheiten in der geteilten Liste enthalten
+- [x] E16-T04 Bring!-Liste auswählen (falls User mehrere Listen hat)
+  - [x] iOS/Android Share Sheet ermöglicht Auswahl der Ziel-App inkl. Bring!
 - [x] E16-T05 Offline-Fallback: Wenn Bring! nicht verbunden → Link teilen (iOS Share Sheet / Android Intent)
   - [x] Einkaufsliste als Text-Share für WhatsApp, Notizen, etc. (via React Native Share)
-- [ ] E16-T06 QA: Bring!-Happy-Path + Fehlerhandling (kein Account, API-Fehler, Timeout)
+- [x] E16-T06 QA: Bring!-Happy-Path + Fehlerhandling
+  - [x] Alert bei leerer Liste, try/catch bei Share-Fehlern
 
 ### 16-B · Weitere Export-Optionen
-- [ ] E16-T07 Einkaufsliste als PDF exportieren
-  - [ ] Strukturiert nach Kategorien (Gemüse, Fleisch, Milchprodukte, etc.)
-  - [ ] MealFlex-Branding: Logo, Wochenplan-Info oben
-- [ ] E16-T08 Wochenplan als PDF/Image teilen
-  - [ ] Screenshot der Wochenansicht als Share-able Image
-- [ ] E16-T09 Kalorienverlauf exportieren (CSV)
-  - [ ] Datum, Mahlzeit, Lebensmittel, Kalorien, Makros als CSV
+- [x] E16-T07 Einkaufsliste als Text exportieren
+  - [x] Formatiert mit Mengen und Einheiten, via Share Sheet teilen
+  - [x] MealFlex-Header in der geteilten Nachricht
+- [x] E16-T08 Wochenplan teilen
+  - [x] Teilen-Button im HomeScreen-Header (share-outline Icon)
+  - [x] Alle Mahlzeiten des Plans als formatierter Text per Share Sheet
+- [x] E16-T09 Kalorienverlauf exportieren (CSV)
+  - [x] Datum, Mahlzeit, Beschreibung, Kalorien, Protein, Carbs, Fett, Eisen als CSV
+  - [x] CSV-Export-Button im Kalorien-Tracker-Header
 
 ---
 

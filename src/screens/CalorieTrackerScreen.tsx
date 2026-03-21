@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    Modal, TextInput, ActivityIndicator, Alert,
+    Modal, TextInput, ActivityIndicator, Alert, Share,
     KeyboardAvoidingView, Platform,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withDelay, withSequence } from 'react-native-reanimated';
@@ -325,6 +325,19 @@ export default function CalorieTrackerScreen() {
         });
     };
 
+    const handleExportCSV = async () => {
+        const header = 'Datum,Mahlzeit,Beschreibung,Kalorien,Protein_g,Carbs_g,Fett_g,Eisen_mg';
+        const rows = weekData.flatMap(d =>
+            getLogsForDate(d.date).map(l =>
+                `${l.log_date},${l.meal_type},"${(l.raw_text ?? '').replace(/"/g, '""')}",${Math.round(l.total_kcal)},${l.total_protein_g.toFixed(1)},${l.total_carbs_g.toFixed(1)},${l.total_fat_g.toFixed(1)},${l.total_iron_mg.toFixed(2)}`
+            )
+        ).join('\n');
+        await Share.share({
+            message: `${header}\n${rows || 'Keine Einträge in den letzten 7 Tagen'}`,
+            title: 'MealFlex Kalorienverlauf.csv',
+        });
+    };
+
     const kcalPct = Math.min(totals.kcal / Math.max(goals.daily_kcal_goal, 1), 1);
     const kcalColor = kcalPct > 1.1 ? '#FF3B30' : kcalPct > 0.9 ? '#34C759' : ORANGE;
     const ironLow = totals.iron < goals.iron_goal_mg * 0.5;
@@ -335,6 +348,10 @@ export default function CalorieTrackerScreen() {
                 {/* Header */}
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Kalorien-Tracker</Text>
+                    <TouchableOpacity style={styles.exportBtn} onPress={handleExportCSV}>
+                        <Ionicons name="download-outline" size={18} color="#FA4A0C" />
+                        <Text style={styles.exportBtnText}>CSV</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Datumsnavigation */}
@@ -452,8 +469,10 @@ export default function CalorieTrackerScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F8F8' },
-    header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 8 },
+    header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     headerTitle: { fontSize: 28, fontWeight: '800', color: '#111' },
+    exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: '#FFF5F0', borderWidth: 1, borderColor: '#FFD5C8' },
+    exportBtnText: { fontSize: 13, color: '#FA4A0C', fontWeight: '700' },
 
     // Date Nav
     dateNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 16 },
