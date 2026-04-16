@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 42,
         fontWeight: '800',
-        color: '#FA4A0C', // Food-app specific orange/red
+        color: '#4A8CFF', // Food-app specific orange/red
         marginBottom: 8,
     },
     subtitle: {
@@ -139,13 +139,13 @@ const styles = StyleSheet.create({
         borderColor: '#EFEFEF',
     },
     primaryButton: {
-        backgroundColor: '#FA4A0C',
+        backgroundColor: '#4A8CFF',
         borderRadius: 14,
         padding: 18,
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 8,
-        shadowColor: '#FA4A0C',
+        shadowColor: '#4A8CFF',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     toggleButtonText: {
-        color: '#FA4A0C',
+        color: '#4A8CFF',
         fontSize: 15,
         fontWeight: '600',
     }

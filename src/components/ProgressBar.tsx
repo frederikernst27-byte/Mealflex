@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     },
     fill: {
         height: '100%',
-        backgroundColor: '#FA4A0C',
+        backgroundColor: '#4A8CFF',
         borderRadius: 3,
     },
     text: {

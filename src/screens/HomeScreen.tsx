@@ -53,7 +53,7 @@ export default function HomeScreen() {
                                             style={styles.swapButton}
                                             onPress={() => swapMeal(day.dayIndex, meal.id)}
                                         >
-                                            <Ionicons name="swap-horizontal" size={20} color="#FA4A0C" />
+                                            <Ionicons name="swap-horizontal" size={20} color="#4A8CFF" />
                                         </TouchableOpacity>
                                     </TouchableOpacity>
                                 </View>
@@ -75,13 +75,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#F8F9FA' },
     header: { padding: 24, paddingBottom: 16, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-    title: { fontSize: 32, fontWeight: '800', color: '#FA4A0C' },
+    title: { fontSize: 32, fontWeight: '800', color: '#4A8CFF' },
     subtitle: { fontSize: 16, color: '#666', marginTop: 4, fontWeight: '500' },
     scrollArea: { flex: 1 },
     scrollContent: { padding: 20 },
     emptyContainer: { padding: 40, alignItems: 'center', justifyContent: 'center' },
     emptyText: { color: '#888', fontSize: 16, marginBottom: 20 },
-    primaryButton: { backgroundColor: '#FA4A0C', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12 },
+    primaryButton: { backgroundColor: '#4A8CFF', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12 },
     primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
     dayCard: {
         backgroundColor: '#FFF',
@@ -124,9 +124,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 1
+        shadowColor: '#4A8CFF', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 1
     },
     logoutContainer: { marginTop: 30, alignItems: 'center', paddingBottom: 40 },
     logoutButton: { padding: 16 },
-    logoutText: { color: '#FA4A0C', fontWeight: '600', fontSize: 16 },
+    logoutText: { color: '#4A8CFF', fontWeight: '600', fontSize: 16 },
 });

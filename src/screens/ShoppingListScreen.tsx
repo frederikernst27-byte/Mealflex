@@ -80,7 +80,7 @@ export default function ShoppingListScreen() {
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#F8F9FA' },
     header: { padding: 24, paddingBottom: 16, backgroundColor: '#FFF' },
-    title: { fontSize: 32, fontWeight: '800', color: '#FA4A0C' },
+    title: { fontSize: 32, fontWeight: '800', color: '#4A8CFF' },
     subtitle: { fontSize: 16, color: '#666', marginTop: 4, fontWeight: '500' },
     progressContainer: { backgroundColor: '#FFF', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
     progressTrack: { height: 8, backgroundColor: '#EFEFEF', borderRadius: 4, overflow: 'hidden' },

@@ -38,7 +38,7 @@ export default function RecipeDetailScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Rezept</Text>
                 <TouchableOpacity style={styles.favoriteButton} onPress={() => toggleFavorite(recipe.id)}>
-                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? "#FA4A0C" : "#333"} />
+                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? "#4A8CFF" : "#333"} />
                 </TouchableOpacity>
             </View>
 
@@ -59,11 +59,11 @@ export default function RecipeDetailScreen() {
 
                     <View style={styles.metaContainer}>
                         <View style={styles.metaBadge}>
-                            <Ionicons name="time-outline" size={16} color="#FA4A0C" />
+                            <Ionicons name="time-outline" size={16} color="#4A8CFF" />
                             <Text style={styles.metaText}>{recipe.prepTime} Min</Text>
                         </View>
                         <View style={styles.metaBadge}>
-                            <Ionicons name="flame-outline" size={16} color="#FA4A0C" />
+                            <Ionicons name="flame-outline" size={16} color="#4A8CFF" />
                             <Text style={styles.metaText}>{recipe.calories} kcal</Text>
                         </View>
                     </View>
@@ -131,15 +131,15 @@ const styles = StyleSheet.create({
     feedbackActiveDislike: { backgroundColor: '#F44336' },
     description: { fontSize: 16, color: '#666', lineHeight: 24, marginBottom: 16 },
     metaContainer: { flexDirection: 'row', gap: 12, marginBottom: 32 },
-    metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF5F0', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
-    metaText: { color: '#FA4A0C', fontWeight: 'bold', marginLeft: 6, fontSize: 14 },
+    metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF3FF', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
+    metaText: { color: '#4A8CFF', fontWeight: 'bold', marginLeft: 6, fontSize: 14 },
     sectionTitle: { fontSize: 20, fontWeight: '700', color: '#222', marginBottom: 16, marginTop: 12 },
     ingredientsBox: { backgroundColor: '#F8F9FA', borderRadius: 16, padding: 20, marginBottom: 24 },
     ingredientRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
     ingredientName: { fontSize: 16, color: '#444' },
     ingredientAmount: { fontSize: 16, fontWeight: '600', color: '#111' },
     stepRow: { flexDirection: 'row', marginBottom: 16 },
-    stepNumberBadge: { backgroundColor: '#FA4A0C', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16, marginTop: 2 },
+    stepNumberBadge: { backgroundColor: '#4A8CFF', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16, marginTop: 2 },
     stepNumberText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
     stepText: { flex: 1, fontSize: 16, color: '#333', lineHeight: 24 },
     macrosContainer: { marginTop: 20, padding: 20, backgroundColor: '#FAFAFA', borderRadius: 16, borderWidth: 1, borderColor: '#EEE' },
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     macroValue: { fontSize: 20, fontWeight: '800', color: '#333' },
     macroLabel: { fontSize: 12, color: '#888', textTransform: 'uppercase', marginTop: 4 },
     footerAction: { padding: 24, backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-    primaryButton: { backgroundColor: '#FA4A0C', flexDirection: 'row', borderRadius: 14, padding: 18, alignItems: 'center', justifyContent: 'center', shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+    primaryButton: { backgroundColor: '#4A8CFF', flexDirection: 'row', borderRadius: 14, padding: 18, alignItems: 'center', justifyContent: 'center', shadowColor: '#4A8CFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
     cookedButton: { backgroundColor: '#4CAF50', shadowColor: '#4CAF50' },
     primaryButtonText: { color: '#FFF', fontSize: 18, fontWeight: '700', marginLeft: 10 },
 });

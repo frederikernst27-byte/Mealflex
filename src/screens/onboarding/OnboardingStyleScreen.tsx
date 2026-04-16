@@ -58,7 +58,7 @@ export default function OnboardingStyleScreen() {
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#FFF' },
     container: { flex: 1, paddingHorizontal: 24, paddingTop: 20 },
-    title: { fontSize: 32, fontWeight: '800', color: '#FA4A0C', marginBottom: 12 },
+    title: { fontSize: 32, fontWeight: '800', color: '#4A8CFF', marginBottom: 12 },
     subtitle: { fontSize: 16, color: '#666', lineHeight: 24, marginBottom: 40 },
     optionsContainer: { gap: 16 },
     optionCard: {
@@ -70,11 +70,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    optionCardSelected: { borderColor: '#FA4A0C', backgroundColor: '#FFF5F0' },
+    optionCardSelected: { borderColor: '#4A8CFF', backgroundColor: '#EEF3FF' },
     emoji: { fontSize: 32, marginRight: 16 },
     textContainer: { flex: 1 },
     optionText: { fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 4 },
-    optionTextSelected: { color: '#FA4A0C' },
+    optionTextSelected: { color: '#4A8CFF' },
     descText: { fontSize: 14, color: '#777', lineHeight: 20 },
     backButton: { marginTop: 'auto', padding: 20, alignItems: 'center' },
     backButtonText: { color: '#999', fontSize: 16, fontWeight: '600' },
