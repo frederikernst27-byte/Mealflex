@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Pizzeria Castello</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="logo" style="justify-content:center; margin-bottom: 1.5rem;">
+        <span class="logo-icon">&#127829;</span>
+        <span class="logo-text">Pizzeria Castello</span>
+      </div>
+      <h2>Admin Login</h2>
+      <p class="login-hint">Standard-Passwort: <code>castello2026</code></p>
+      <form id="loginForm">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" required autocomplete="current-password" />
+        <button type="submit" class="btn btn-primary">Anmelden</button>
+      </form>
+      <p id="loginError" class="error-message"></p>
+      <p style="margin-top: 1.5rem; text-align:center;">
+        <a href="index.html">&larr; Zur&uuml;ck zur Website</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="admin-container" id="adminContainer" style="display:none;">
+    <aside class="admin-sidebar">
+      <div class="logo">
+        <span class="logo-icon">&#127829;</span>
+        <span class="logo-text">Castello</span>
+      </div>
+      <nav class="admin-nav">
+        <button class="admin-nav-btn active" data-view="dishes">&#127829; Speisen</button>
+        <button class="admin-nav-btn" data-view="categories">&#128209; Kategorien</button>
+        <button class="admin-nav-btn" data-view="settings">&#9881; Einstellungen</button>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="index.html" class="btn btn-secondary btn-block">Website anzeigen</a>
+        <button id="logoutBtn" class="btn btn-danger btn-block" style="margin-top: 0.5rem;">Abmelden</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <!-- Speisen-Verwaltung -->
+      <section class="admin-view active" id="view-dishes">
+        <div class="admin-header">
+          <div>
+            <h1>Speisen verwalten</h1>
+            <p class="subtitle">Bearbeiten, hinzuf&uuml;gen oder entfernen Sie Speisen</p>
+          </div>
+          <button class="btn btn-primary" id="addDishBtn">+ Neue Speise</button>
+        </div>
+
+        <div class="admin-toolbar">
+          <input type="text" id="searchInput" placeholder="Speise suchen..." class="search-input" />
+          <select id="filterCategory" class="filter-select">
+            <option value="all">Alle Kategorien</option>
+            <option value="pizza">Pizza</option>
+            <option value="pasta">Pasta</option>
+            <option value="salat">Salat</option>
+            <option value="dessert">Dessert</option>
+            <option value="getraenk">Getr&auml;nke</option>
+          </select>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Bild</th>
+                <th>Name</th>
+                <th>Kategorie</th>
+                <th>Preis</th>
+                <th>Verf&uuml;gbar</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody id="dishesTableBody">
+              <!-- Dynamisch bef&uuml;llt -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Kategorien -->
+      <section class="admin-view" id="view-categories">
+        <div class="admin-header">
+          <div>
+            <h1>Kategorien</h1>
+            <p class="subtitle">&Uuml;bersicht der Speisen-Kategorien</p>
+          </div>
+        </div>
+        <div class="category-stats" id="categoryStats">
+          <!-- Dynamisch bef&uuml;llt -->
+        </div>
+      </section>
+
+      <!-- Einstellungen -->
+      <section class="admin-view" id="view-settings">
+        <div class="admin-header">
+          <div>
+            <h1>Einstellungen</h1>
+            <p class="subtitle">Restaurant-Informationen bearbeiten</p>
+          </div>
+        </div>
+
+        <form class="settings-form" id="settingsForm">
+          <div class="form-group">
+            <label for="restName">Restaurant-Name</label>
+            <input type="text" id="restName" />
+          </div>
+          <div class="form-group">
+            <label for="restAddress">Adresse</label>
+            <input type="text" id="restAddress" />
+          </div>
+          <div class="form-group">
+            <label for="restPhone">Telefon</label>
+            <input type="text" id="restPhone" />
+          </div>
+          <div class="form-group">
+            <label for="restStatus">Status</label>
+            <select id="restStatus">
+              <option value="open">Ge&ouml;ffnet</option>
+              <option value="closed">Geschlossen</option>
+              <option value="permanently_closed">Dauerhaft geschlossen</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Admin-Passwort &auml;ndern</label>
+            <input type="password" id="adminPassword" placeholder="Leer lassen, um nicht zu &auml;ndern" />
+          </div>
+          <button type="submit" class="btn btn-primary">Speichern</button>
+        </form>
+
+        <div class="danger-zone">
+          <h3>Gefahrenzone</h3>
+          <p>Setzt alle Speisen auf die Standard-Speisekarte zur&uuml;ck.</p>
+          <button class="btn btn-danger" id="resetDataBtn">Speisekarte zur&uuml;cksetzen</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Dish Edit Modal -->
+  <div class="modal" id="dishEditModal">
+    <div class="modal-content modal-large">
+      <span class="modal-close" id="dishEditClose">&times;</span>
+      <h2 id="dishEditTitle">Speise bearbeiten</h2>
+      <form id="dishEditForm">
+        <input type="hidden" id="dishId" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dishName">Name *</label>
+            <input type="text" id="dishName" required />
+          </div>
+          <div class="form-group">
+            <label for="dishCategory">Kategorie *</label>
+            <select id="dishCategory" required>
+              <option value="pizza">Pizza</option>
+              <option value="pasta">Pasta</option>
+              <option value="salat">Salat</option>
+              <option value="dessert">Dessert</option>
+              <option value="getraenk">Getr&auml;nke</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dishDescription">Beschreibung</label>
+          <textarea id="dishDescription" rows="3"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dishPrice">Preis (&euro;) *</label>
+            <input type="number" id="dishPrice" step="0.10" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="dishEmoji">Emoji / Icon</label>
+            <input type="text" id="dishEmoji" maxlength="4" placeholder="z.B. &#127829;" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dishImage">Bild hochladen</label>
+          <input type="file" id="dishImage" accept="image/*" />
+          <div class="image-preview" id="imagePreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="dishAvailable" checked />
+            Verf&uuml;gbar
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="dishEditCancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

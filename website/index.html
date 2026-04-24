@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pizzeria Castello - Oberhausen</title>
+  <meta name="description" content="Pizzeria Castello in Oberhausen - Italienische Spezialitäten, Pizza, Pasta und mehr." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <nav class="navbar">
+      <div class="logo">
+        <span class="logo-icon">&#127829;</span>
+        <span class="logo-text">Pizzeria Castello</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#menu">Speisekarte</a></li>
+        <li><a href="#about">Über uns</a></li>
+        <li><a href="#contact">Kontakt</a></li>
+        <li><a href="admin.html" class="admin-link">Admin</a></li>
+      </ul>
+    </nav>
+
+    <div class="hero-content" id="home">
+      <h1>Pizzeria Castello</h1>
+      <p class="tagline">Authentische italienische Küche in Oberhausen</p>
+      <div class="hero-meta">
+        <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+        <span>4.727 Rezensionen</span>
+        <span class="separator">&middot;</span>
+        <span>1-10 &euro;</span>
+        <span class="separator">&middot;</span>
+        <span>Restaurant</span>
+      </div>
+      <div class="status-banner" id="statusBanner">Dauerhaft geschlossen</div>
+      <a href="#menu" class="cta-button">Speisekarte ansehen</a>
+    </div>
+  </header>
+
+  <section class="menu-section" id="menu">
+    <div class="container">
+      <h2>Unsere Speisekarte</h2>
+      <p class="section-subtitle">Frisch zubereitet, mit Liebe serviert</p>
+
+      <div class="category-filter" id="categoryFilter">
+        <button class="filter-btn active" data-category="all">Alle</button>
+        <button class="filter-btn" data-category="pizza">Pizza</button>
+        <button class="filter-btn" data-category="pasta">Pasta</button>
+        <button class="filter-btn" data-category="salat">Salate</button>
+        <button class="filter-btn" data-category="dessert">Dessert</button>
+        <button class="filter-btn" data-category="getraenk">Getr&auml;nke</button>
+      </div>
+
+      <div class="menu-grid" id="menuGrid">
+        <!-- Dynamisch von js/app.js befüllt -->
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section" id="about">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text">
+          <h2>&Uuml;ber uns</h2>
+          <p>
+            Willkommen bei Pizzeria Castello! Seit vielen Jahren servieren wir
+            unseren G&auml;sten authentische italienische K&uuml;che mit frischen
+            Zutaten und Rezepten aus der Heimat. Unsere Pizza wird im Steinofen
+            gebacken - knusprig, aromatisch und unwiderstehlich.
+          </p>
+          <p>
+            Ob f&uuml;r einen schnellen Mittagstisch, ein entspanntes Abendessen
+            oder eine Lieferung nach Hause - bei uns sind Sie richtig.
+          </p>
+        </div>
+        <div class="about-features">
+          <div class="feature">
+            <span class="feature-icon">&#128293;</span>
+            <h3>Steinofen</h3>
+            <p>Traditionell gebacken</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#127813;</span>
+            <h3>Frische Zutaten</h3>
+            <p>T&auml;glich frisch</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#128666;</span>
+            <h3>Lieferservice</h3>
+            <p>Direkt zu Ihnen</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section" id="contact">
+    <div class="container">
+      <h2>Kontakt &amp; &Ouml;ffnungszeiten</h2>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <h3>&#128205; Adresse</h3>
+          <p>Bahnhofstra&szlig;e 42<br />46145 Oberhausen</p>
+        </div>
+        <div class="contact-card">
+          <h3>&#128222; Telefon</h3>
+          <p><a href="tel:020838590901">0208 38590901</a></p>
+        </div>
+        <div class="contact-card">
+          <h3>&#128337; &Ouml;ffnungszeiten</h3>
+          <p>Mo-So: 11:00 - 22:00<br /><em>(Aktuell geschlossen)</em></p>
+        </div>
+        <div class="contact-card">
+          <h3>&#128180; Preise</h3>
+          <p>1-10 &euro; pro Person</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Pizzeria Castello - Bahnhofstra&szlig;e 42, 46145 Oberhausen</p>
+      <p><a href="admin.html">Admin-Bereich</a></p>
+    </div>
+  </footer>
+
+  <!-- Modal f&uuml;r Speise-Details -->
+  <div class="modal" id="dishModal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
