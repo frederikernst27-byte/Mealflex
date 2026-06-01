@@ -52,22 +52,22 @@ export default function OnboardingLanguageScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#FFF' },
+    safeArea: { flex: 1, backgroundColor: '#0A0A0A' },
     container: { flex: 1, paddingHorizontal: 24, paddingTop: 20 },
-    title: { fontSize: 32, fontWeight: '800', color: '#4A8CFF', marginBottom: 12 },
-    subtitle: { fontSize: 16, color: '#666', lineHeight: 24, marginBottom: 40 },
+    title: { fontSize: 32, fontWeight: '800', color: '#FA4A0C', marginBottom: 12 },
+    subtitle: { fontSize: 16, color: '#9A9A9A', lineHeight: 24, marginBottom: 40 },
     optionsContainer: { gap: 16 },
     optionCard: {
         padding: 24,
         borderRadius: 16,
         borderWidth: 2,
-        borderColor: '#F0F0F0',
-        backgroundColor: '#FAFAFA',
+        borderColor: '#262626',
+        backgroundColor: '#161616',
         alignItems: 'center',
     },
-    optionCardSelected: { borderColor: '#4A8CFF', backgroundColor: '#EEF3FF' },
-    optionText: { fontSize: 18, fontWeight: '700', color: '#333' },
-    optionTextSelected: { color: '#4A8CFF' },
+    optionCardSelected: { borderColor: '#FA4A0C', backgroundColor: 'rgba(250,74,12,0.14)' },
+    optionText: { fontSize: 18, fontWeight: '700', color: '#FFFFFF' },
+    optionTextSelected: { color: '#FA4A0C' },
     backButton: { marginTop: 'auto', padding: 20, alignItems: 'center' },
-    backButtonText: { color: '#999', fontSize: 16, fontWeight: '600' },
+    backButtonText: { color: '#9A9A9A', fontSize: 16, fontWeight: '600' },
 });

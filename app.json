@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mealflex-app",
+    "name": "MealFlex",
     "slug": "mealflex-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,7 +12,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.frederikernst.mealflex",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "MealFlex braucht Kamera-Zugriff, um Rezept-Fotos aufzunehmen.",
+        "NSPhotoLibraryUsageDescription": "MealFlex braucht Galerie-Zugriff, um Rezept-Fotos auszuwählen.",
+        "NSPhotoLibraryAddUsageDescription": "MealFlex speichert Fotos in deiner Galerie."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,8 +27,22 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MealFlex möchte auf deine Fotos zugreifen, um Rezept-Bilder hinzuzufügen.",
+          "cameraPermission": "MealFlex möchte deine Kamera nutzen, um Rezept-Fotos aufzunehmen."
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

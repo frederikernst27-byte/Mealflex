@@ -1,16 +1,42 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import ShoppingListScreen from '../screens/ShoppingListScreen';
-import CalorieTrackerScreen from '../screens/CalorieTrackerScreen';
 import CommunityScreen from '../screens/CommunityScreen';
-import AIMEChatScreen from '../screens/AIMEChatScreen';
+import SavedRecipesScreen from '../screens/SavedRecipesScreen';
+import RecipeUploadScreen from '../screens/RecipeUploadScreen';
+import CalorieTrackerScreen from '../screens/CalorieTrackerScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import PricingScreen from '../screens/PricingScreen';
+import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
+const CommunityStack = createNativeStackNavigator();
+const ProfileStack = createNativeStackNavigator();
 
-// Unified brand blue – replaces legacy orange #FA4A0C
-const ACTIVE_BLUE = '#4A8CFF';
+function CommunityStackNavigator() {
+    return (
+        <CommunityStack.Navigator screenOptions={{ headerShown: false }}>
+            <CommunityStack.Screen name="CommunityFeed" component={CommunityScreen} />
+            <CommunityStack.Screen
+                name="RecipeUpload"
+                component={RecipeUploadScreen}
+                options={{ presentation: 'modal' }}
+            />
+        </CommunityStack.Navigator>
+    );
+}
+
+function ProfileStackNavigator() {
+    return (
+        <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+            <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} />
+            <ProfileStack.Screen name="Pricing" component={PricingScreen} options={{ presentation: 'modal' }} />
+        </ProfileStack.Navigator>
+    );
+}
 
 export default function MainTabNavigator() {
     return (
@@ -22,56 +48,36 @@ export default function MainTabNavigator() {
 
                     if (route.name === 'Home') {
                         iconName = focused ? 'home' : 'home-outline';
-                    } else if (route.name === 'Kalorien') {
-                        iconName = focused ? 'flame' : 'flame-outline';
                     } else if (route.name === 'ShoppingList') {
                         iconName = focused ? 'cart' : 'cart-outline';
                     } else if (route.name === 'Community') {
                         iconName = focused ? 'people' : 'people-outline';
-                    } else if (route.name === 'AIME') {
-                        iconName = focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline';
+                    } else if (route.name === 'Saved') {
+                        iconName = focused ? 'bookmark' : 'bookmark-outline';
+                    } else if (route.name === 'Tracker') {
+                        iconName = focused ? 'flame' : 'flame-outline';
+                    } else if (route.name === 'Profile') {
+                        iconName = focused ? 'person' : 'person-outline';
                     }
 
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: ACTIVE_BLUE,
-                tabBarInactiveTintColor: 'gray',
-                // Remove any border/shadow that creates a visible bar above the tab bar
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.muted,
                 tabBarStyle: {
-                    borderTopWidth: 0,
-                    elevation: 8,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: -2 },
-                    shadowOpacity: 0.06,
-                    shadowRadius: 8,
+                    borderTopWidth: 1,
+                    borderTopColor: colors.border,
+                    backgroundColor: colors.surface,
+                    paddingBottom: 4,
                 },
             })}
         >
-            <Tab.Screen
-                name="Home"
-                component={HomeScreen}
-                options={{ title: 'Wochenplan' }}
-            />
-            <Tab.Screen
-                name="Kalorien"
-                component={CalorieTrackerScreen}
-                options={{ title: 'Kalorien' }}
-            />
-            <Tab.Screen
-                name="ShoppingList"
-                component={ShoppingListScreen}
-                options={{ title: 'Einkauf' }}
-            />
-            <Tab.Screen
-                name="Community"
-                component={CommunityScreen}
-                options={{ title: 'Community' }}
-            />
-            <Tab.Screen
-                name="AIME"
-                component={AIMEChatScreen}
-                options={{ title: 'AIME' }}
-            />
+            <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Wochenplan' }} />
+            <Tab.Screen name="Tracker" component={CalorieTrackerScreen} options={{ title: 'Tracker' }} />
+<Tab.Screen name="Community" component={CommunityStackNavigator} options={{ title: 'Community' }} />
+            <Tab.Screen name="Saved" component={SavedRecipesScreen} options={{ title: 'Gespeichert' }} />
+            <Tab.Screen name="ShoppingList" component={ShoppingListScreen} options={{ title: 'Einkauf' }} />
+            <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ title: 'Profil' }} />
         </Tab.Navigator>
     );
 }

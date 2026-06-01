@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert, Share } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useMealplan } from '../context/MealplanContext';
+import { useCalorie } from '../context/CalorieContext';
 import { Ionicons } from '@expo/vector-icons';
 import { MealSlot } from '../types/mealplan';
+import { Recipe } from '../types/recipe';
+import { colors } from '../theme';
 
 export default function RecipeDetailScreen() {
     const route = useRoute<any>();
@@ -18,16 +21,85 @@ export default function RecipeDetailScreen() {
         toggleFavorite
     } = useMealplan();
 
-    const { dayIndex, mealSlot }: { dayIndex: number, mealSlot: MealSlot } = route.params;
-    const { recipe } = mealSlot;
+    const params = route.params ?? {};
+    const mealSlot = params.mealSlot as MealSlot | undefined;
+    const dayIndex = typeof params.dayIndex === 'number' ? params.dayIndex : 0;
+    const communityRecipe = params.communityRecipe as Recipe | undefined;
+    const recipe = mealSlot?.recipe ?? communityRecipe;
+
+    if (!recipe) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Rezept</Text>
+                    <View style={styles.favoriteButton} />
+                </View>
+                <View style={styles.content}>
+                    <Text style={styles.sectionTitle}>Rezept konnte nicht geladen werden.</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     const isLiked = likedRecipes.includes(recipe.id);
     const isDisliked = dislikedRecipes.includes(recipe.id);
     const isFavorite = favoriteRecipes.includes(recipe.id);
 
+    const { addLog } = useCalorie();
+
+    const handleShareIngredients = async () => {
+        const lines = recipe.ingredients.map(ing => `• ${ing.amount} ${ing.unit} ${ing.name}`).join('\n');
+        await Share.share({
+            message: `🛒 Zutaten für „${recipe.title}" (${recipe.portions} Portion)\n\n${lines}`,
+            title: recipe.title,
+        });
+    };
+
     const handleToggleCooked = () => {
-        toggleCookedStatus(dayIndex, mealSlot.id, !mealSlot.cooked);
-        navigation.goBack();
+        if (!mealSlot) return;
+        const newCooked = !mealSlot.cooked;
+        toggleCookedStatus(dayIndex, mealSlot.id, newCooked);
+
+        // E14-T09: Auto-import Kalorien wenn als gekocht markiert
+        if (newCooked && recipe.calories > 0) {
+            Alert.alert(
+                '🍽️ In Tracker übernehmen?',
+                `Möchtest du "${recipe.title}" (${recipe.calories} kcal) automatisch in deinen Kalorien-Tracker eintragen?`,
+                [
+                    { text: 'Nein', style: 'cancel', onPress: () => navigation.goBack() },
+                    {
+                        text: 'Ja, eintragen',
+                        onPress: () => {
+                            addLog({
+                                log_date: new Date().toISOString().split('T')[0],
+                                meal_type: 'lunch',
+                                raw_text: recipe.title,
+                                parsed_foods: [{
+                                    name: recipe.title,
+                                    amount_g: 0,
+                                    kcal: recipe.calories,
+                                    protein: recipe.macros.protein,
+                                    carbs: recipe.macros.carbs,
+                                    fat: recipe.macros.fat,
+                                    iron: 0,
+                                }],
+                                total_kcal: recipe.calories,
+                                total_protein_g: recipe.macros.protein,
+                                total_carbs_g: recipe.macros.carbs,
+                                total_fat_g: recipe.macros.fat,
+                                total_iron_mg: 0,
+                            });
+                            navigation.goBack();
+                        },
+                    },
+                ]
+            );
+        } else {
+            navigation.goBack();
+        }
     };
 
     return (
@@ -38,7 +110,7 @@ export default function RecipeDetailScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Rezept</Text>
                 <TouchableOpacity style={styles.favoriteButton} onPress={() => toggleFavorite(recipe.id)}>
-                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? "#4A8CFF" : "#333"} />
+                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? colors.primary : colors.text} />
                 </TouchableOpacity>
             </View>
 
@@ -48,10 +120,10 @@ export default function RecipeDetailScreen() {
                         <Text style={styles.title}>{recipe.title}</Text>
                         <View style={styles.feedbackContainer}>
                             <TouchableOpacity style={[styles.feedbackButton, isLiked && styles.feedbackActiveLike]} onPress={() => toggleLike(recipe.id)}>
-                                <Ionicons name={isLiked ? "thumbs-up" : "thumbs-up-outline"} size={20} color={isLiked ? "#FFF" : "#666"} />
+                                <Ionicons name={isLiked ? "thumbs-up" : "thumbs-up-outline"} size={20} color={isLiked ? "#FFF" : colors.muted} />
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.feedbackButton, isDisliked && styles.feedbackActiveDislike]} onPress={() => toggleDislike(recipe.id)}>
-                                <Ionicons name={isDisliked ? "thumbs-down" : "thumbs-down-outline"} size={20} color={isDisliked ? "#FFF" : "#666"} />
+                                <Ionicons name={isDisliked ? "thumbs-down" : "thumbs-down-outline"} size={20} color={isDisliked ? "#FFF" : colors.muted} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -59,11 +131,11 @@ export default function RecipeDetailScreen() {
 
                     <View style={styles.metaContainer}>
                         <View style={styles.metaBadge}>
-                            <Ionicons name="time-outline" size={16} color="#4A8CFF" />
+                            <Ionicons name="time-outline" size={16} color="#FA4A0C" />
                             <Text style={styles.metaText}>{recipe.prepTime} Min</Text>
                         </View>
                         <View style={styles.metaBadge}>
-                            <Ionicons name="flame-outline" size={16} color="#4A8CFF" />
+                            <Ionicons name="flame-outline" size={16} color="#FA4A0C" />
                             <Text style={styles.metaText}>{recipe.calories} kcal</Text>
                         </View>
                     </View>
@@ -101,54 +173,70 @@ export default function RecipeDetailScreen() {
             </ScrollView>
 
             <View style={styles.footerAction}>
-                <TouchableOpacity
-                    style={[styles.primaryButton, mealSlot.cooked && styles.cookedButton]}
-                    onPress={handleToggleCooked}
-                >
-                    <Ionicons name={mealSlot.cooked ? "checkmark-done-circle" : "checkmark-circle-outline"} size={22} color="#FFF" />
-                    <Text style={styles.primaryButtonText}>
-                        {mealSlot.cooked ? 'Als ungekocht markieren' : 'Als gekocht markieren'}
-                    </Text>
+                <TouchableOpacity style={styles.shareButton} onPress={handleShareIngredients}>
+                    <Ionicons name="cart-outline" size={20} color="#FA4A0C" />
+                    <Text style={styles.shareButtonText}>Zutaten teilen</Text>
                 </TouchableOpacity>
+                {mealSlot ? (
+                    <TouchableOpacity
+                        style={[styles.primaryButton, mealSlot.cooked && styles.cookedButton, { flex: 1, marginLeft: 12 }]}
+                        onPress={handleToggleCooked}
+                    >
+                        <Ionicons name={mealSlot.cooked ? "checkmark-done-circle" : "checkmark-circle-outline"} size={22} color="#FFF" />
+                        <Text style={styles.primaryButtonText}>
+                            {mealSlot.cooked ? 'Ungekocht' : 'Gekocht'}
+                        </Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={[styles.primaryButton, { flex: 1, marginLeft: 12 }]}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons name="checkmark-circle-outline" size={22} color="#FFF" />
+                        <Text style={styles.primaryButtonText}>Fertig</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#FFF' },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+    safeArea: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
     backButton: { padding: 8 },
-    headerTitle: { fontSize: 18, fontWeight: '600', color: '#333' },
+    headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
     favoriteButton: { padding: 8 },
     scrollArea: { flex: 1 },
     content: { padding: 24 },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
-    title: { flex: 1, fontSize: 32, fontWeight: '800', color: '#111', marginRight: 16 },
+    title: { flex: 1, fontSize: 32, fontWeight: '800', color: colors.text, marginRight: 16 },
     feedbackContainer: { flexDirection: 'row', gap: 8 },
-    feedbackButton: { padding: 10, backgroundColor: '#F0F0F0', borderRadius: 20 },
-    feedbackActiveLike: { backgroundColor: '#4CAF50' },
-    feedbackActiveDislike: { backgroundColor: '#F44336' },
-    description: { fontSize: 16, color: '#666', lineHeight: 24, marginBottom: 16 },
+    feedbackButton: { padding: 10, backgroundColor: colors.surfaceAlt, borderRadius: 20 },
+    feedbackActiveLike: { backgroundColor: colors.success },
+    feedbackActiveDislike: { backgroundColor: colors.danger },
+    description: { fontSize: 16, color: colors.muted, lineHeight: 24, marginBottom: 16 },
     metaContainer: { flexDirection: 'row', gap: 12, marginBottom: 32 },
-    metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF3FF', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
-    metaText: { color: '#4A8CFF', fontWeight: 'bold', marginLeft: 6, fontSize: 14 },
-    sectionTitle: { fontSize: 20, fontWeight: '700', color: '#222', marginBottom: 16, marginTop: 12 },
-    ingredientsBox: { backgroundColor: '#F8F9FA', borderRadius: 16, padding: 20, marginBottom: 24 },
+    metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primarySoft, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
+    metaText: { color: colors.primary, fontWeight: 'bold', marginLeft: 6, fontSize: 14 },
+    sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: 16, marginTop: 12 },
+    ingredientsBox: { backgroundColor: colors.surface, borderRadius: 16, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: colors.border },
     ingredientRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-    ingredientName: { fontSize: 16, color: '#444' },
-    ingredientAmount: { fontSize: 16, fontWeight: '600', color: '#111' },
+    ingredientName: { fontSize: 16, color: colors.textSoft },
+    ingredientAmount: { fontSize: 16, fontWeight: '600', color: colors.text },
     stepRow: { flexDirection: 'row', marginBottom: 16 },
-    stepNumberBadge: { backgroundColor: '#4A8CFF', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16, marginTop: 2 },
+    stepNumberBadge: { backgroundColor: colors.primary, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16, marginTop: 2 },
     stepNumberText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
-    stepText: { flex: 1, fontSize: 16, color: '#333', lineHeight: 24 },
-    macrosContainer: { marginTop: 20, padding: 20, backgroundColor: '#FAFAFA', borderRadius: 16, borderWidth: 1, borderColor: '#EEE' },
+    stepText: { flex: 1, fontSize: 16, color: colors.textSoft, lineHeight: 24 },
+    macrosContainer: { marginTop: 20, padding: 20, backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border },
     macrosRow: { flexDirection: 'row', justifyContent: 'space-around' },
     macroCard: { alignItems: 'center' },
-    macroValue: { fontSize: 20, fontWeight: '800', color: '#333' },
-    macroLabel: { fontSize: 12, color: '#888', textTransform: 'uppercase', marginTop: 4 },
-    footerAction: { padding: 24, backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-    primaryButton: { backgroundColor: '#4A8CFF', flexDirection: 'row', borderRadius: 14, padding: 18, alignItems: 'center', justifyContent: 'center', shadowColor: '#4A8CFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-    cookedButton: { backgroundColor: '#4CAF50', shadowColor: '#4CAF50' },
-    primaryButtonText: { color: '#FFF', fontSize: 18, fontWeight: '700', marginLeft: 10 },
+    macroValue: { fontSize: 20, fontWeight: '800', color: colors.text },
+    macroLabel: { fontSize: 12, color: colors.muted, textTransform: 'uppercase', marginTop: 4 },
+    footerAction: { flexDirection: 'row', padding: 16, backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border, alignItems: 'center' },
+    shareButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 14, borderWidth: 1.5, borderColor: colors.primary, backgroundColor: colors.primarySoft },
+    shareButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
+    primaryButton: { backgroundColor: colors.primary, flexDirection: 'row', borderRadius: 14, padding: 16, alignItems: 'center', justifyContent: 'center', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+    cookedButton: { backgroundColor: colors.success, shadowColor: colors.success },
+    primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '700', marginLeft: 8 },
 });
