@@ -7,6 +7,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, w
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCommunity, CommunityRecipe } from '../context/CommunityContext';
+import { colors } from '../theme';
 
 const FILTERS = [
     { id: 'high-protein', label: '💪 High Protein' },
@@ -95,7 +96,7 @@ function RecipeCard({ recipe }: { recipe: CommunityRecipe }) {
                         <Ionicons
                             name={recipe.sourceType === 'official' ? 'shield-checkmark' : 'person-circle-outline'}
                             size={13}
-                            color={recipe.sourceType === 'official' ? '#FA4A0C' : '#BBB'}
+                            color={recipe.sourceType === 'official' ? colors.primary : colors.muted}
                         />
                         <Text style={[styles.authorText, recipe.sourceType === 'official' && styles.authorOfficial]}>
                             {recipe.authorName}
@@ -109,9 +110,9 @@ function RecipeCard({ recipe }: { recipe: CommunityRecipe }) {
 
                 {/* Macros */}
                 <View style={styles.macroRow}>
-                    <MacroPill icon="🔥" value={`${recipe.calories} kcal`} color="#FF6B35" />
-                    <MacroPill icon="💪" value={`${recipe.macros.protein}g`} color="#4CAF50" />
-                    <MacroPill icon="⏱" value={`${recipe.prepTime} min`} color="#2196F3" />
+                    <MacroPill icon="🔥" value={`${recipe.calories} kcal`} color={colors.primary} />
+                    <MacroPill icon="💪" value={`${recipe.macros.protein}g`} color={colors.protein} />
+                    <MacroPill icon="⏱" value={`${recipe.prepTime} min`} color={colors.carbs} />
                 </View>
 
                 {/* Actions */}
@@ -122,7 +123,7 @@ function RecipeCard({ recipe }: { recipe: CommunityRecipe }) {
                             <Ionicons
                                 name={isLiked ? 'heart' : 'heart-outline'}
                                 size={22}
-                                color={isLiked ? '#E53935' : '#999'}
+                                color={isLiked ? '#E53935' : colors.muted}
                             />
                         </Animated.View>
                         <Text style={[styles.likeCount, isLiked && { color: '#E53935' }]}>
@@ -218,11 +219,11 @@ export default function CommunityScreen() {
                         {/* Search */}
                         <View style={styles.searchWrapper}>
                             <View style={styles.searchBar}>
-                                <Ionicons name="search-outline" size={18} color="#999" />
+                                <Ionicons name="search-outline" size={18} color={colors.muted} />
                                 <TextInput
                                     style={styles.searchInput}
                                     placeholder="Suchen: vegan, keto, asiatisch..."
-                                    placeholderTextColor="#BBB"
+                                    placeholderTextColor={colors.mutedSoft}
                                     value={inputValue}
                                     onChangeText={t => { setInputValue(t); setShowSuggestions(t.length > 0); }}
                                     onSubmitEditing={() => { setSearchQuery(inputValue); setShowSuggestions(false); }}
@@ -231,7 +232,7 @@ export default function CommunityScreen() {
                                 />
                                 {inputValue.length > 0 && (
                                     <TouchableOpacity onPress={clearSearch}>
-                                        <Ionicons name="close-circle" size={18} color="#CCC" />
+                                        <Ionicons name="close-circle" size={18} color={colors.muted} />
                                     </TouchableOpacity>
                                 )}
                             </View>
@@ -318,63 +319,65 @@ export default function CommunityScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#F7F7F7' },
+    safeArea: { flex: 1, backgroundColor: colors.background },
     listContent: { paddingBottom: 32 },
 
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
-        paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, backgroundColor: '#FFF',
+        paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, backgroundColor: colors.background,
     },
-    title: { fontSize: 30, fontWeight: '800', color: '#1A1A1A', letterSpacing: -0.5 },
-    subtitle: { fontSize: 13, color: '#999', marginTop: 2 },
+    title: { fontSize: 30, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+    subtitle: { fontSize: 13, color: colors.muted, marginTop: 2 },
     uploadBtn: {
         width: 44, height: 44, borderRadius: 22,
-        backgroundColor: '#FA4A0C', alignItems: 'center', justifyContent: 'center',
-        shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+        backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center',
+        shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
     },
 
-    searchWrapper: { backgroundColor: '#FFF', paddingHorizontal: 16, paddingBottom: 12, position: 'relative', zIndex: 10 },
+    searchWrapper: { backgroundColor: colors.background, paddingHorizontal: 16, paddingBottom: 12, position: 'relative', zIndex: 10 },
     searchBar: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
-        backgroundColor: '#F4F4F6', borderRadius: 14,
+        backgroundColor: colors.surfaceAlt, borderRadius: 14,
         paddingHorizontal: 14, paddingVertical: 11,
+        borderWidth: 1, borderColor: colors.border,
     },
-    searchInput: { flex: 1, fontSize: 15, color: '#1A1A1A' },
+    searchInput: { flex: 1, fontSize: 15, color: colors.text },
     suggestions: {
         position: 'absolute', top: 52, left: 16, right: 16, zIndex: 100,
-        backgroundColor: '#FFF', borderRadius: 14,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 12,
+        backgroundColor: colors.surfaceElevated, borderRadius: 14, borderWidth: 1, borderColor: colors.border,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 12,
         overflow: 'hidden',
     },
-    suggestionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: '#F5F5F5' },
-    suggestionText: { fontSize: 14, color: '#333', fontWeight: '500' },
+    suggestionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: colors.border },
+    suggestionText: { fontSize: 14, color: colors.textSoft, fontWeight: '500' },
 
-    filterArea: { backgroundColor: '#FFF', paddingBottom: 12 },
+    filterArea: { backgroundColor: colors.background, paddingBottom: 12 },
     clearFiltersBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 16, marginBottom: 8 },
-    clearFiltersText: { fontSize: 12, color: '#FA4A0C', fontWeight: '600' },
+    clearFiltersText: { fontSize: 12, color: colors.primary, fontWeight: '600' },
     filterList: { paddingHorizontal: 16, gap: 8 },
-    filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: '#F4F4F6' },
-    filterChipOn: { backgroundColor: '#FA4A0C' },
-    filterChipText: { fontSize: 13, color: '#555', fontWeight: '500' },
-    filterChipTextOn: { color: '#FFF', fontWeight: '600' },
+    filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border },
+    filterChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+    filterChipText: { fontSize: 13, color: colors.muted, fontWeight: '500' },
+    filterChipTextOn: { color: colors.onPrimary, fontWeight: '600' },
 
     swapInfoBanner: {
         flexDirection: 'row', alignItems: 'center', gap: 8,
         marginHorizontal: 16, marginTop: 12, marginBottom: 4,
-        backgroundColor: '#FFF5F2', borderRadius: 12, padding: 12,
-        borderLeftWidth: 3, borderLeftColor: '#FA4A0C',
+        backgroundColor: colors.primarySoft, borderRadius: 12, padding: 12,
+        borderLeftWidth: 3, borderLeftColor: colors.primary,
     },
-    swapInfoText: { fontSize: 13, color: '#FA4A0C', fontWeight: '600', flex: 1 },
+    swapInfoText: { fontSize: 13, color: colors.primary, fontWeight: '600', flex: 1 },
 
     // Card
     card: {
-        backgroundColor: '#FFF', borderRadius: 20, marginHorizontal: 16, marginTop: 14,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 3,
+        backgroundColor: colors.surface, borderRadius: 20, marginHorizontal: 16, marginTop: 14,
+        borderWidth: 1, borderColor: colors.border,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 3,
         overflow: 'hidden',
     },
     imageContainer: { position: 'relative' },
     cardImage: { width: '100%', height: 200 },
-    imagePlaceholder: { backgroundColor: '#F0F0F0', alignItems: 'center', justifyContent: 'center' },
+    imagePlaceholder: { backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     placeholderEmoji: { fontSize: 56 },
     pendingBadge: {
         position: 'absolute', top: 12, left: 12,
@@ -384,23 +387,23 @@ const styles = StyleSheet.create({
     saveOverlay: {
         position: 'absolute', top: 12, right: 12,
         width: 36, height: 36, borderRadius: 18,
-        backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center',
     },
-    saveOverlayActive: { backgroundColor: '#FFF5F2' },
+    saveOverlayActive: { backgroundColor: colors.primarySoft },
 
     cardContent: { padding: 16 },
     cardMeta: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
     authorRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    authorText: { fontSize: 12, color: '#999', fontWeight: '500' },
-    authorOfficial: { color: '#FA4A0C', fontWeight: '700' },
-    cuisineText: { fontSize: 12, color: '#FA4A0C', fontWeight: '600' },
+    authorText: { fontSize: 12, color: colors.muted, fontWeight: '500' },
+    authorOfficial: { color: colors.primary, fontWeight: '700' },
+    cuisineText: { fontSize: 12, color: colors.primary, fontWeight: '600' },
     officialBadge: {
         position: 'absolute', top: 12, left: 12,
         flexDirection: 'row', alignItems: 'center', gap: 4,
-        backgroundColor: '#FA4A0C', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12,
+        backgroundColor: colors.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12,
     },
     officialBadgeText: { color: '#FFF', fontSize: 11, fontWeight: '800' },
-    cardTitle: { fontSize: 18, fontWeight: '700', color: '#1A1A1A', lineHeight: 24, marginBottom: 12 },
+    cardTitle: { fontSize: 18, fontWeight: '700', color: colors.text, lineHeight: 24, marginBottom: 12 },
 
     macroRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
     macroPill: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
@@ -408,18 +411,18 @@ const styles = StyleSheet.create({
 
     actionBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     likeBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    likeCount: { fontSize: 14, color: '#999', fontWeight: '600' },
+    likeCount: { fontSize: 14, color: colors.muted, fontWeight: '600' },
     swapCTA: {
         flexDirection: 'row', alignItems: 'center', gap: 6,
         paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20,
-        backgroundColor: '#FFF5F2', borderWidth: 1.5, borderColor: '#FA4A0C',
+        backgroundColor: colors.primarySoft, borderWidth: 1.5, borderColor: colors.primary,
     },
-    swapCTAActive: { backgroundColor: '#FA4A0C', borderColor: '#FA4A0C' },
-    swapCTAText: { fontSize: 13, fontWeight: '700', color: '#FA4A0C' },
-    swapCTATextActive: { color: '#FFF' },
+    swapCTAActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    swapCTAText: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    swapCTATextActive: { color: colors.onPrimary },
 
     empty: { alignItems: 'center', justifyContent: 'center', padding: 60, gap: 12 },
     emptyEmoji: { fontSize: 52 },
-    emptyTitle: { fontSize: 18, fontWeight: '700', color: '#333' },
-    emptyText: { fontSize: 14, color: '#999', textAlign: 'center', lineHeight: 20 },
+    emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+    emptyText: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 20 },
 });

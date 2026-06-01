@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ActivityIndicator, View, Text } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, Text, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { colors } from './src/theme';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { supabase } from './lib/supabase';
 import AuthScreen from './AuthScreen';
@@ -11,8 +12,22 @@ import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
 import { MealplanProvider, useMealplan } from './src/context/MealplanContext';
 import { CommunityProvider } from './src/context/CommunityContext';
 import { CalorieProvider } from './src/context/CalorieContext';
+import { SubscriptionProvider } from './src/context/SubscriptionContext';
 
 const Stack = createNativeStackNavigator();
+
+// Dunkles Navigations-Theme, damit Screen-Übergänge & Hintergründe nicht weiß aufblitzen
+const navTheme = {
+    ...DarkTheme,
+    colors: {
+        ...DarkTheme.colors,
+        background: colors.background,
+        card: colors.surface,
+        text: colors.text,
+        border: colors.border,
+        primary: colors.primary,
+    },
+};
 
 // Innere Komponente, die Zugriff auf MealplanContext hat
 function AppNavigator({ session }: { session: any }) {
@@ -50,7 +65,7 @@ function AppNavigator({ session }: { session: any }) {
     if (onboardingDone === null || (onboardingDone && isLoadingPlan)) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FA4A0C" />
+                <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={styles.loadingText}>Dein Plan wird geladen…</Text>
             </View>
         );
@@ -97,7 +112,7 @@ export default function App() {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FA4A0C" />
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
@@ -107,7 +122,9 @@ export default function App() {
         <MealplanProvider>
             <CommunityProvider>
                 <CalorieProvider>
-                <NavigationContainer>
+                <SubscriptionProvider>
+                <NavigationContainer theme={navTheme}>
+                    <StatusBar barStyle="light-content" backgroundColor={colors.background} />
                     {!session ? (
                         <Stack.Navigator screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="Auth" component={AuthScreen} />
@@ -116,6 +133,7 @@ export default function App() {
                         <AppNavigator session={session} />
                     )}
                 </NavigationContainer>
+                </SubscriptionProvider>
                 </CalorieProvider>
             </CommunityProvider>
         </MealplanProvider>
@@ -125,9 +143,9 @@ export default function App() {
 
 const styles = StyleSheet.create({
     loadingContainer: {
-        flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF', gap: 16,
+        flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, gap: 16,
     },
     loadingText: {
-        fontSize: 15, color: '#999',
+        fontSize: 15, color: colors.muted,
     },
 });

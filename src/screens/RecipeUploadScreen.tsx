@@ -8,6 +8,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useCommunity, UploadDraft } from '../context/CommunityContext';
 import { NutritionGoal, CookingStyle } from '../types/recipe';
 import { pickRecipeImage } from '../services/communityService';
+import { useSubscription } from '../context/SubscriptionContext';
+import { colors } from '../theme';
 
 const STEPS = ['Grundinfos', 'Nährwerte', 'Zutaten', 'Zubereitung', 'Fertigstellen'];
 
@@ -37,7 +39,7 @@ function Field({ placeholder, value, onChange, multiline, keyboardType }: any) {
         <TextInput
             style={[s.input, multiline && s.inputMulti]}
             placeholder={placeholder}
-            placeholderTextColor="#C0C0C0"
+            placeholderTextColor={colors.mutedSoft}
             value={value}
             onChangeText={onChange}
             multiline={multiline}
@@ -120,7 +122,7 @@ function Step2({ draft, update }: { draft: UploadDraft; update: (p: Partial<Uplo
                             value={(draft as any)[key] > 0 ? String((draft as any)[key]) : ''}
                             onChangeText={t => update({ [key]: parseInt(t) || 0 } as any)}
                             placeholder="0"
-                            placeholderTextColor="#CCC"
+                            placeholderTextColor={colors.mutedSoft}
                         />
                     </View>
                 ))}
@@ -164,14 +166,14 @@ function Step3({ draft, update }: { draft: UploadDraft; update: (p: Partial<Uplo
                         <TextInput
                             style={[s.input, s.ingName]}
                             placeholder="Zutat"
-                            placeholderTextColor="#C0C0C0"
+                            placeholderTextColor={colors.mutedSoft}
                             value={ing.name}
                             onChangeText={t => setIngredient(i, 'name', t)}
                         />
                         <TextInput
                             style={[s.input, s.ingAmt]}
                             placeholder="100"
-                            placeholderTextColor="#C0C0C0"
+                            placeholderTextColor={colors.mutedSoft}
                             keyboardType="numeric"
                             value={ing.amount}
                             onChangeText={t => setIngredient(i, 'amount', t)}
@@ -224,7 +226,7 @@ function Step4({ draft, update }: { draft: UploadDraft; update: (p: Partial<Uplo
                     <TextInput
                         style={[s.input, s.stepInput]}
                         placeholder={`Schritt ${i + 1} beschreiben...`}
-                        placeholderTextColor="#C0C0C0"
+                        placeholderTextColor={colors.mutedSoft}
                         value={step}
                         onChangeText={t => setStep(i, t)}
                         multiline
@@ -246,7 +248,10 @@ function Step4({ draft, update }: { draft: UploadDraft; update: (p: Partial<Uplo
 
 // ── Foto-Picker Komponente ────────────────────────────────────────
 function PhotoPicker({ uri, onPick }: { uri?: string; onPick: (uri: string) => void }) {
+    const navigation = useNavigation<any>();
+    const { requirePro } = useSubscription();
     const handlePress = async () => {
+        if (!requirePro('Foto-Upload', () => navigation.navigate('Profile', { screen: 'Pricing' }))) return;
         const choose = async (source: 'gallery' | 'camera') => {
             try {
                 const picked = await pickRecipeImage(source);
@@ -284,7 +289,7 @@ function PhotoPicker({ uri, onPick }: { uri?: string; onPick: (uri: string) => v
 
     return (
         <TouchableOpacity style={s.photoBox} onPress={handlePress}>
-            <Ionicons name="camera-outline" size={36} color="#CCC" />
+            <Ionicons name="camera-outline" size={36} color={colors.muted} />
             <Text style={s.photoText}>Foto aufnehmen oder aus Galerie</Text>
             <Text style={s.photoSub}>JPG / PNG · max. 10 MB</Text>
         </TouchableOpacity>
@@ -364,7 +369,7 @@ function Step5({ draft, update }: { draft: UploadDraft; update: (p: Partial<Uplo
                 <Switch
                     value={draft.addToSwap}
                     onValueChange={v => update({ addToSwap: v })}
-                    trackColor={{ false: '#E8E8E8', true: '#FA4A0C' }}
+                    trackColor={{ false: colors.border, true: colors.primary }}
                     thumbColor="#FFF"
                 />
             </View>
@@ -375,7 +380,8 @@ function Step5({ draft, update }: { draft: UploadDraft; update: (p: Partial<Uplo
 // ── Main Screen ───────────────────────────────────────────────────
 export default function RecipeUploadScreen() {
     const navigation = useNavigation<any>();
-    const { uploadDraft, updateUploadDraft, resetUploadDraft, submitRecipe } = useCommunity();
+    const { uploadDraft, updateUploadDraft, resetUploadDraft, submitRecipe, communityRecipes } = useCommunity();
+    const { isPro, requirePro } = useSubscription();
     const [step, setStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
 
@@ -389,10 +395,15 @@ export default function RecipeUploadScreen() {
     };
 
     const handleSubmit = async () => {
+        const ownUploads = communityRecipes.filter(r => r.sourceType === 'community').length;
+        if (!isPro && ownUploads >= 1) {
+            requirePro('Unbegrenzte Community-Uploads', () => navigation.navigate('Profile', { screen: 'Pricing' }));
+            return;
+        }
         setSubmitting(true);
         try {
-            await submitRecipe(uploadDraft);
-            Alert.alert('Eingereicht! 🎉', 'Dein Rezept wird geprüft und erscheint dann im Community-Feed.', [
+            await submitRecipe(uploadDraft, uploadDraft.imageUri);
+            Alert.alert('Eingereicht', 'Dein Rezept wird geprüft und erscheint dann im Community-Feed.', [
                 { text: 'Super!', onPress: () => navigation.goBack() },
             ]);
         } catch {
@@ -409,7 +420,7 @@ export default function RecipeUploadScreen() {
             {/* Header */}
             <View style={s.header}>
                 <TouchableOpacity onPress={() => step > 1 ? setStep(p => p - 1) : navigation.goBack()} style={s.backBtn}>
-                    <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+                    <Ionicons name="chevron-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
                     <Text style={s.headerTitle}>Rezept hinzufügen</Text>
@@ -471,84 +482,84 @@ export default function RecipeUploadScreen() {
 }
 
 const s = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#FFF' },
+    safeArea: { flex: 1, backgroundColor: colors.background },
 
-    header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, gap: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+    header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, gap: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
     backBtn: { padding: 4 },
-    headerTitle: { fontSize: 16, fontWeight: '700', color: '#1A1A1A' },
-    headerSub: { fontSize: 12, color: '#999', marginTop: 1 },
-    cancelText: { fontSize: 14, color: '#999' },
+    headerTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+    headerSub: { fontSize: 12, color: colors.muted, marginTop: 1 },
+    cancelText: { fontSize: 14, color: colors.muted },
 
     dotsRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E8E8E8' },
-    dotActive: { width: 24, backgroundColor: '#FA4A0C' },
-    dotDone: { backgroundColor: '#FA4A0C', opacity: 0.35 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
+    dotActive: { width: 24, backgroundColor: colors.primary },
+    dotDone: { backgroundColor: colors.primary, opacity: 0.35 },
 
     scroll: { padding: 20, paddingBottom: 40 },
     stepBody: { gap: 16 },
 
-    label: { fontSize: 14, fontWeight: '600', color: '#444' },
+    label: { fontSize: 14, fontWeight: '600', color: colors.textSoft },
     input: {
-        backgroundColor: '#F7F7F7', borderRadius: 12, borderWidth: 1, borderColor: '#EBEBEB',
-        paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: '#1A1A1A',
+        backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border,
+        paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: colors.text,
     },
     inputMulti: { minHeight: 90, textAlignVertical: 'top' },
 
     chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F4F4F6' },
-    chipOn: { backgroundColor: '#1A1A1A' },
-    chipText: { fontSize: 13, color: '#555', fontWeight: '500' },
-    chipTextOn: { color: '#FFF' },
+    chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border },
+    chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+    chipText: { fontSize: 13, color: colors.muted, fontWeight: '500' },
+    chipTextOn: { color: colors.onPrimary },
 
     macroGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     macroBox: { width: '47%', gap: 6 },
     macroLabel: { fontSize: 13, fontWeight: '700' },
     macroInput: {
-        backgroundColor: '#F7F7F7', borderRadius: 12, borderWidth: 1.5,
-        paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#1A1A1A', fontWeight: '600',
+        backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1.5,
+        paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: colors.text, fontWeight: '600',
     },
-    macroBarCard: { backgroundColor: '#F7F7F7', borderRadius: 14, padding: 16, gap: 10 },
-    macroBarTitle: { fontSize: 13, fontWeight: '600', color: '#555' },
-    macroBarTrack: { height: 10, borderRadius: 5, flexDirection: 'row', overflow: 'hidden', backgroundColor: '#E8E8E8' },
+    macroBarCard: { backgroundColor: colors.surface, borderRadius: 14, padding: 16, gap: 10, borderWidth: 1, borderColor: colors.border },
+    macroBarTitle: { fontSize: 13, fontWeight: '600', color: colors.muted },
+    macroBarTrack: { height: 10, borderRadius: 5, flexDirection: 'row', overflow: 'hidden', backgroundColor: colors.surfaceAlt },
     macroBarSeg: { height: 10 },
     macroBarLegend: { flexDirection: 'row', gap: 16 },
     legendDot: { fontSize: 12, fontWeight: '500' },
 
-    ingRow: { gap: 8, backgroundColor: '#F9F9F9', borderRadius: 14, padding: 12 },
+    ingRow: { gap: 8, backgroundColor: colors.surface, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: colors.border },
     ingInputs: { flexDirection: 'row', gap: 8 },
     ingName: { flex: 1 },
     ingAmt: { width: 80 },
     unitRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    unitChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, backgroundColor: '#EBEBEB' },
-    unitChipOn: { backgroundColor: '#FA4A0C' },
-    unitText: { fontSize: 12, color: '#666' },
-    unitTextOn: { color: '#FFF', fontWeight: '600' },
+    unitChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border },
+    unitChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+    unitText: { fontSize: 12, color: colors.muted },
+    unitTextOn: { color: colors.onPrimary, fontWeight: '600' },
     deleteBtn: { padding: 6 },
 
     addRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
-    addText: { fontSize: 15, color: '#FA4A0C', fontWeight: '600' },
+    addText: { fontSize: 15, color: colors.primary, fontWeight: '600' },
 
     stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-    stepNum: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#FA4A0C', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
-    stepNumText: { color: '#FFF', fontSize: 13, fontWeight: '800' },
+    stepNum: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+    stepNumText: { color: colors.onPrimary, fontSize: 13, fontWeight: '800' },
     stepInput: { flex: 1, minHeight: 70 },
 
     optionRow: { flexDirection: 'row', gap: 10 },
     optionCard: {
         flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 14,
-        backgroundColor: '#F4F4F6', borderWidth: 2, borderColor: 'transparent', gap: 4,
+        backgroundColor: colors.surfaceAlt, borderWidth: 2, borderColor: colors.border, gap: 4,
     },
-    optionCardOn: { borderColor: '#FA4A0C', backgroundColor: '#FFF5F2' },
+    optionCardOn: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
     optionEmoji: { fontSize: 22 },
-    optionText: { fontSize: 12, fontWeight: '600', color: '#666', textAlign: 'center' },
-    optionTextOn: { color: '#FA4A0C' },
+    optionText: { fontSize: 12, fontWeight: '600', color: colors.muted, textAlign: 'center' },
+    optionTextOn: { color: colors.primary },
 
     photoBox: {
-        height: 160, borderRadius: 16, borderWidth: 2, borderColor: '#E8E8E8', borderStyle: 'dashed',
-        backgroundColor: '#FAFAFA', alignItems: 'center', justifyContent: 'center', gap: 8,
+        height: 160, borderRadius: 16, borderWidth: 2, borderColor: colors.border, borderStyle: 'dashed',
+        backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', gap: 8,
     },
-    photoText: { fontSize: 14, color: '#AAA', fontWeight: '600', textAlign: 'center' },
-    photoSub: { fontSize: 12, color: '#CCC' },
+    photoText: { fontSize: 14, color: colors.muted, fontWeight: '600', textAlign: 'center' },
+    photoSub: { fontSize: 12, color: colors.mutedSoft },
     photoPreviewBox: { height: 200, borderRadius: 16, overflow: 'hidden' },
     photoPreviewImg: { width: '100%', height: '100%' },
     photoEditOverlay: {
@@ -559,22 +570,22 @@ const s = StyleSheet.create({
     photoEditText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
 
     swapToggleCard: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: '#F7F7F7',
-        borderRadius: 14, padding: 16, gap: 12,
+        flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
+        borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.border,
     },
-    swapToggleTitle: { fontSize: 15, fontWeight: '700', color: '#1A1A1A' },
-    swapToggleSub: { fontSize: 12, color: '#999', marginTop: 2 },
+    swapToggleTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    swapToggleSub: { fontSize: 12, color: colors.muted, marginTop: 2 },
 
-    footer: { padding: 20, paddingBottom: 28, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+    footer: { padding: 20, paddingBottom: 28, borderTopWidth: 1, borderTopColor: colors.border },
     nextBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        backgroundColor: '#FA4A0C', borderRadius: 16, paddingVertical: 16,
-        shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+        backgroundColor: colors.primary, borderRadius: 16, paddingVertical: 16,
+        shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
     },
     submitBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        backgroundColor: '#4CAF50', borderRadius: 16, paddingVertical: 16,
-        shadowColor: '#4CAF50', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+        backgroundColor: colors.success, borderRadius: 16, paddingVertical: 16,
+        shadowColor: colors.success, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
     },
     nextBtnOff: { opacity: 0.4, shadowOpacity: 0 },
     nextBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },

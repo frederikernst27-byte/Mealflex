@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { parseFoodWithGemini } from '../services/aiService';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
@@ -207,9 +206,8 @@ export function CalorieProvider({ children }: { children: React.ReactNode }) {
         return (data ?? []) as FoodItem[];
     };
 
-    const parseFoodText = async (text: string): Promise<ParsedFood[]> => {
-        // Claude AI-Parsing
-        return parseFoodWithGemini(text);
+    const parseFoodText = async (_text: string): Promise<ParsedFood[]> => {
+        return [];
     };
 
     const getDayTotals = (date: string) => {

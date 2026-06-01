@@ -7,7 +7,6 @@ import { supabase } from '../../lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { UploadDraft, CommunityRecipe } from '../context/CommunityContext';
 
-const SUPABASE_URL = 'https://hhkddsjttsxbqqsfmcci.supabase.co';
 const BUCKET = 'recipe-photos';
 
 // ── Foto aus Galerie / Kamera wählen ─────────────────────────────
@@ -199,6 +198,12 @@ function rowToRecipe(row: any): CommunityRecipe {
         tags: row.tags ?? [],
         suitableGoals: row.goals ?? [],
         suitableStyles: row.styles ?? [],
+        ingredients: ingredients.map((i: any) => ({
+            name: i.name ?? '',
+            amount: typeof i.amount === 'number' ? i.amount : parseFloat(i.amount ?? '0') || 0,
+            unit: i.unit ?? 'g',
+        })),
+        steps,
         imageUrl: row.image_url ?? undefined,
         cuisine: row.cuisine ?? '',
         source: 'community',

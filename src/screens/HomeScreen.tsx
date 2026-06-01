@@ -9,6 +9,7 @@ import { MealSlot } from '../types/mealplan';
 import { SwipeDeckModal } from '../components/SwipeDeck';
 import { mockRecipes } from '../data/mockRecipes';
 import { useCalorie } from '../context/CalorieContext';
+import { colors } from '../theme';
 
 const DAY_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -100,7 +101,7 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} bounces={true} alwaysBounceVertical={true}>
 
                 {/* Header */}
                 <View style={styles.header}>
@@ -190,7 +191,7 @@ export default function HomeScreen() {
                             }]} />
                         </View>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color="#CCC" />
+                    <Ionicons name="chevron-forward" size={16} color={colors.muted} />
                 </TouchableOpacity>
 
                 {/* Empty State */}
@@ -256,102 +257,98 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#F7F7F7' },
+    safeArea: { flex: 1, backgroundColor: colors.background },
+    scrollView: { flex: 1 },
     scroll: { paddingBottom: 32 },
 
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
-        paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, backgroundColor: '#FFF',
-        borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
+        paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, backgroundColor: colors.background,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
     },
-    greeting: { fontSize: 28, fontWeight: '800', color: '#1A1A1A', letterSpacing: -0.5 },
-    weekLabel: { fontSize: 13, color: '#999', marginTop: 2 },
-    shareBtn: { padding: 8, borderRadius: 20, backgroundColor: '#FFF5F2', borderWidth: 1, borderColor: '#FFD5C8' },
-    logoutBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: '#FFF5F2', borderWidth: 1, borderColor: '#FFD5C8' },
-    logoutText: { fontSize: 13, color: '#FA4A0C', fontWeight: '700' },
+    greeting: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+    weekLabel: { fontSize: 13, color: colors.muted, marginTop: 2 },
+    shareBtn: { padding: 8, borderRadius: 20, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
+    logoutBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
+    logoutText: { fontSize: 13, color: colors.primary, fontWeight: '700' },
 
     progressCard: {
-        backgroundColor: '#FFF', marginHorizontal: 16, marginTop: 16, borderRadius: 18,
-        padding: 18, gap: 10,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+        backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 18,
+        padding: 18, gap: 10, borderWidth: 1, borderColor: colors.border,
     },
     progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    progressLabel: { fontSize: 14, fontWeight: '600', color: '#555' },
-    progressCount: { fontSize: 14, fontWeight: '700', color: '#1A1A1A' },
-    progressTrack: { height: 8, backgroundColor: '#F0F0F0', borderRadius: 4 },
-    progressFill: { height: 8, backgroundColor: '#FA4A0C', borderRadius: 4 },
+    progressLabel: { fontSize: 14, fontWeight: '600', color: colors.muted },
+    progressCount: { fontSize: 14, fontWeight: '700', color: colors.text },
+    progressTrack: { height: 8, backgroundColor: colors.surfaceAlt, borderRadius: 4 },
+    progressFill: { height: 8, backgroundColor: colors.primary, borderRadius: 4 },
     swapHint: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    swapHintText: { fontSize: 12, color: '#FA4A0C', fontWeight: '600' },
+    swapHintText: { fontSize: 12, color: colors.primary, fontWeight: '600' },
 
     macroCard: {
-        backgroundColor: '#FFF', marginHorizontal: 16, marginTop: 16, borderRadius: 18,
-        padding: 18,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+        backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 18,
+        padding: 18, borderWidth: 1, borderColor: colors.border,
     },
-    macroCardTitle: { fontSize: 12, color: '#999', fontWeight: '600', marginBottom: 12 },
+    macroCardTitle: { fontSize: 12, color: colors.muted, fontWeight: '600', marginBottom: 12 },
     macroRow: { flexDirection: 'row', alignItems: 'center' },
     macroItem: { flex: 1, alignItems: 'center', gap: 2 },
-    macroValue: { fontSize: 22, fontWeight: '800', color: '#FF6B35' },
-    macroUnit: { fontSize: 11, color: '#AAA', fontWeight: '500' },
-    macroDivider: { width: 1, height: 36, backgroundColor: '#F0F0F0' },
+    macroValue: { fontSize: 22, fontWeight: '800', color: colors.primary },
+    macroUnit: { fontSize: 11, color: colors.muted, fontWeight: '500' },
+    macroDivider: { width: 1, height: 36, backgroundColor: colors.border },
 
     emptyCard: {
-        backgroundColor: '#FFF', marginHorizontal: 16, marginTop: 16, borderRadius: 20, padding: 32,
-        alignItems: 'center', gap: 10,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+        backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 20, padding: 32,
+        alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.border,
     },
     emptyEmoji: { fontSize: 56, marginBottom: 4 },
-    emptyTitle: { fontSize: 20, fontWeight: '800', color: '#1A1A1A' },
-    emptyText: { fontSize: 14, color: '#999', textAlign: 'center', lineHeight: 21 },
+    emptyTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
+    emptyText: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 21 },
     ctaBtn: {
-        marginTop: 8, backgroundColor: '#FA4A0C', paddingHorizontal: 28, paddingVertical: 14, borderRadius: 16,
-        shadowColor: '#FA4A0C', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+        marginTop: 8, backgroundColor: colors.primary, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 16,
+        shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
     },
-    ctaBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+    ctaBtnText: { color: colors.onPrimary, fontWeight: '700', fontSize: 15 },
 
     daySection: { marginTop: 20, paddingHorizontal: 16 },
     dayHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
-    dayTag: { backgroundColor: '#1A1A1A', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-    dayTagText: { color: '#FFF', fontWeight: '800', fontSize: 12 },
-    dayDate: { fontSize: 13, color: '#999' },
-    dayLine: { flex: 1, height: 1, backgroundColor: '#EBEBEB' },
+    dayTag: { backgroundColor: colors.primary, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+    dayTagText: { color: colors.onPrimary, fontWeight: '800', fontSize: 12 },
+    dayDate: { fontSize: 13, color: colors.muted },
+    dayLine: { flex: 1, height: 1, backgroundColor: colors.border },
 
     mealsContainer: { gap: 8 },
     mealCard: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF',
-        borderRadius: 16, padding: 16,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
+        flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
+        borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border,
     },
-    mealCardCooked: { backgroundColor: '#F0FAF1' },
+    mealCardCooked: { backgroundColor: colors.successSoft, borderColor: 'transparent' },
     mealCardLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-    mealDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#FA4A0C' },
-    cookedCheck: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#4CAF50', alignItems: 'center', justifyContent: 'center' },
-    mealTitle: { fontSize: 15, fontWeight: '700', color: '#1A1A1A', marginBottom: 4 },
-    mealTitleCooked: { color: '#4CAF50', textDecorationLine: 'line-through' },
+    mealDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
+    cookedCheck: { width: 20, height: 20, borderRadius: 10, backgroundColor: colors.success, alignItems: 'center', justifyContent: 'center' },
+    mealTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginBottom: 4 },
+    mealTitleCooked: { color: colors.success, textDecorationLine: 'line-through' },
     mealMeta: { flexDirection: 'row', gap: 10 },
-    mealMetaText: { fontSize: 12, color: '#999' },
+    mealMetaText: { fontSize: 12, color: colors.muted },
     swapBtn: {
         width: 38, height: 38, borderRadius: 19,
-        backgroundColor: '#FFF5F2', alignItems: 'center', justifyContent: 'center',
-        borderWidth: 1, borderColor: '#FFD5C8',
+        backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center',
+        borderWidth: 1, borderColor: colors.primary,
     },
 
     macroDot: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     macroDotCircle: { width: 8, height: 8, borderRadius: 4 },
-    macroDotText: { fontSize: 11, color: '#666' },
+    macroDotText: { fontSize: 11, color: colors.muted },
 
     // Kalorien-Widget
     kcalWidget: {
         flexDirection: 'row', alignItems: 'center', gap: 12,
-        backgroundColor: '#FFF', marginHorizontal: 16, marginTop: 16,
-        borderRadius: 18, padding: 16,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+        backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16,
+        borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border,
     },
     kcalWidgetLeft: { alignItems: 'center', gap: 2 },
-    kcalWidgetLabel: { fontSize: 10, color: '#999', fontWeight: '600' },
+    kcalWidgetLabel: { fontSize: 10, color: colors.muted, fontWeight: '600' },
     kcalWidgetCenter: { flex: 1 },
-    kcalWidgetValue: { fontSize: 16, fontWeight: '800', color: '#1A1A1A' },
-    kcalWidgetGoal: { fontSize: 12, fontWeight: '400', color: '#AAA' },
-    kcalWidgetTrack: { height: 4, backgroundColor: '#F0F0F0', borderRadius: 2, marginTop: 6, overflow: 'hidden' },
+    kcalWidgetValue: { fontSize: 16, fontWeight: '800', color: colors.text },
+    kcalWidgetGoal: { fontSize: 12, fontWeight: '400', color: colors.muted },
+    kcalWidgetTrack: { height: 4, backgroundColor: colors.surfaceAlt, borderRadius: 2, marginTop: 6, overflow: 'hidden' },
     kcalWidgetFill: { height: 4, borderRadius: 2 },
 });

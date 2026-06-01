@@ -8,10 +8,13 @@ import CommunityScreen from '../screens/CommunityScreen';
 import SavedRecipesScreen from '../screens/SavedRecipesScreen';
 import RecipeUploadScreen from '../screens/RecipeUploadScreen';
 import CalorieTrackerScreen from '../screens/CalorieTrackerScreen';
-import CoachChatScreen from '../screens/CoachChatScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import PricingScreen from '../screens/PricingScreen';
+import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
 const CommunityStack = createNativeStackNavigator();
+const ProfileStack = createNativeStackNavigator();
 
 function CommunityStackNavigator() {
     return (
@@ -23,6 +26,15 @@ function CommunityStackNavigator() {
                 options={{ presentation: 'modal' }}
             />
         </CommunityStack.Navigator>
+    );
+}
+
+function ProfileStackNavigator() {
+    return (
+        <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+            <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} />
+            <ProfileStack.Screen name="Pricing" component={PricingScreen} options={{ presentation: 'modal' }} />
+        </ProfileStack.Navigator>
     );
 }
 
@@ -44,28 +56,28 @@ export default function MainTabNavigator() {
                         iconName = focused ? 'bookmark' : 'bookmark-outline';
                     } else if (route.name === 'Tracker') {
                         iconName = focused ? 'flame' : 'flame-outline';
-                    } else if (route.name === 'Coach') {
-                        iconName = focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline';
+                    } else if (route.name === 'Profile') {
+                        iconName = focused ? 'person' : 'person-outline';
                     }
 
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: '#FA4A0C',
-                tabBarInactiveTintColor: 'gray',
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.muted,
                 tabBarStyle: {
                     borderTopWidth: 1,
-                    borderTopColor: '#F0F0F0',
-                    backgroundColor: '#FFF',
+                    borderTopColor: colors.border,
+                    backgroundColor: colors.surface,
                     paddingBottom: 4,
                 },
             })}
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Wochenplan' }} />
             <Tab.Screen name="Tracker" component={CalorieTrackerScreen} options={{ title: 'Tracker' }} />
-            <Tab.Screen name="Coach" component={CoachChatScreen} options={{ title: 'Coach' }} />
-            <Tab.Screen name="Community" component={CommunityStackNavigator} options={{ title: 'Community' }} />
+<Tab.Screen name="Community" component={CommunityStackNavigator} options={{ title: 'Community' }} />
             <Tab.Screen name="Saved" component={SavedRecipesScreen} options={{ title: 'Gespeichert' }} />
             <Tab.Screen name="ShoppingList" component={ShoppingListScreen} options={{ title: 'Einkauf' }} />
+            <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ title: 'Profil' }} />
         </Tab.Navigator>
     );
 }

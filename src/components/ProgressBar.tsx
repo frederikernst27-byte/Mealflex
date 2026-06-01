@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
+import { colors } from '../theme';
 
 interface ProgressBarProps {
     currentStep: number;
@@ -27,18 +28,18 @@ const styles = StyleSheet.create({
     },
     track: {
         height: 6,
-        backgroundColor: '#EFEFEF',
+        backgroundColor: colors.surfaceAlt,
         borderRadius: 3,
         overflow: 'hidden',
     },
     fill: {
         height: '100%',
-        backgroundColor: '#FA4A0C',
+        backgroundColor: colors.primary,
         borderRadius: 3,
     },
     text: {
         fontSize: 12,
-        color: '#666',
+        color: colors.muted,
         marginBottom: 8,
         fontWeight: '600',
     },

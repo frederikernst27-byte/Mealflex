@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCommunity, CommunityRecipe } from '../context/CommunityContext';
+import { colors } from '../theme';
 
 const GOAL_FILTERS = [
     { value: 'all', label: 'Alle' },
@@ -204,71 +205,72 @@ export default function SavedRecipesScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#F7F7F7' },
+    safeArea: { flex: 1, backgroundColor: colors.background },
     listContent: { paddingBottom: 32 },
 
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
-        paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12, backgroundColor: '#FFF',
+        paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12, backgroundColor: colors.background,
     },
-    title: { fontSize: 30, fontWeight: '800', color: '#1A1A1A', letterSpacing: -0.5 },
-    subtitle: { fontSize: 13, color: '#999', marginTop: 2 },
+    title: { fontSize: 30, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+    subtitle: { fontSize: 13, color: colors.muted, marginTop: 2 },
     swapBadge: {
         flexDirection: 'row', alignItems: 'center', gap: 5,
-        backgroundColor: '#FFF5F2', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20,
-        borderWidth: 1, borderColor: '#FFD5C8',
+        backgroundColor: colors.primarySoft, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20,
+        borderWidth: 1, borderColor: colors.primary,
     },
-    swapBadgeText: { fontSize: 12, color: '#FA4A0C', fontWeight: '700' },
+    swapBadgeText: { fontSize: 12, color: colors.primary, fontWeight: '700' },
 
     swapBanner: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
-        backgroundColor: '#FFF5F2', marginHorizontal: 16, marginTop: 8, marginBottom: 4,
-        padding: 12, borderRadius: 12, borderLeftWidth: 3, borderLeftColor: '#FA4A0C',
+        backgroundColor: colors.primarySoft, marginHorizontal: 16, marginTop: 8, marginBottom: 4,
+        padding: 12, borderRadius: 12, borderLeftWidth: 3, borderLeftColor: colors.primary,
     },
-    swapBannerText: { flex: 1, fontSize: 13, color: '#FA4A0C', fontWeight: '600' },
+    swapBannerText: { flex: 1, fontSize: 13, color: colors.primary, fontWeight: '600' },
 
-    filterSection: { backgroundColor: '#FFF', paddingBottom: 14, paddingTop: 8 },
+    filterSection: { backgroundColor: colors.background, paddingBottom: 14, paddingTop: 8 },
     filterRow: { paddingHorizontal: 16, gap: 8 },
-    filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: '#F4F4F6' },
-    filterChipOn: { backgroundColor: '#1A1A1A' },
-    filterChipText: { fontSize: 13, color: '#555', fontWeight: '500' },
-    filterChipTextOn: { color: '#FFF', fontWeight: '600' },
-    tagChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: '#F4F4F6', borderWidth: 1, borderColor: '#EBEBEB' },
-    tagChipOn: { backgroundColor: '#FFF5F2', borderColor: '#FA4A0C' },
-    tagChipText: { fontSize: 12, color: '#777' },
-    tagChipTextOn: { color: '#FA4A0C', fontWeight: '600' },
+    filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border },
+    filterChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+    filterChipText: { fontSize: 13, color: colors.muted, fontWeight: '500' },
+    filterChipTextOn: { color: colors.onPrimary, fontWeight: '600' },
+    tagChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border },
+    tagChipOn: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
+    tagChipText: { fontSize: 12, color: colors.muted },
+    tagChipTextOn: { color: colors.primary, fontWeight: '600' },
 
     // Card
     card: {
-        flexDirection: 'row', backgroundColor: '#FFF',
+        flexDirection: 'row', backgroundColor: colors.surface,
         borderRadius: 18, marginHorizontal: 16, marginTop: 12,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+        borderWidth: 1, borderColor: colors.border,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 2,
         overflow: 'hidden',
     },
     thumb: { width: 110, height: 130 },
-    thumbPlaceholder: { backgroundColor: '#F0F0F0', alignItems: 'center', justifyContent: 'center' },
+    thumbPlaceholder: { backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     thumbEmoji: { fontSize: 36 },
     cardBody: { flex: 1, padding: 14, gap: 5 },
     cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
-    cardTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: '#1A1A1A', lineHeight: 21 },
-    cardMeta: { fontSize: 12, color: '#888' },
-    cuisineLabel: { fontSize: 11, color: '#FA4A0C', fontWeight: '600' },
+    cardTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: colors.text, lineHeight: 21 },
+    cardMeta: { fontSize: 12, color: colors.muted },
+    cuisineLabel: { fontSize: 11, color: colors.primary, fontWeight: '600' },
     swapToggle: {
         flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4,
         paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12,
-        backgroundColor: '#F4F4F6', borderWidth: 1, borderColor: '#E8E8E8', alignSelf: 'flex-start',
+        backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border, alignSelf: 'flex-start',
     },
-    swapToggleActive: { backgroundColor: '#FA4A0C', borderColor: '#FA4A0C' },
-    swapToggleText: { fontSize: 12, color: '#555', fontWeight: '600' },
-    swapToggleTextActive: { color: '#FFF' },
+    swapToggleActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    swapToggleText: { fontSize: 12, color: colors.muted, fontWeight: '600' },
+    swapToggleTextActive: { color: colors.onPrimary },
 
     empty: { alignItems: 'center', justifyContent: 'center', padding: 60, gap: 12 },
     emptyEmoji: { fontSize: 56 },
-    emptyTitle: { fontSize: 18, fontWeight: '700', color: '#333' },
-    emptyText: { fontSize: 14, color: '#999', textAlign: 'center', lineHeight: 20 },
+    emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+    emptyText: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 20 },
     discoverBtn: {
         marginTop: 8, paddingHorizontal: 24, paddingVertical: 13,
-        backgroundColor: '#FA4A0C', borderRadius: 16,
+        backgroundColor: colors.primary, borderRadius: 16,
     },
-    discoverBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+    discoverBtnText: { color: colors.onPrimary, fontWeight: '700', fontSize: 15 },
 });

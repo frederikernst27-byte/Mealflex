@@ -142,26 +142,26 @@ export default function OnboardingFinishScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#FFF' },
+    safeArea: { flex: 1, backgroundColor: '#0A0A0A' },
     container: {
         flex: 1, paddingHorizontal: 24, paddingTop: 32,
         alignItems: 'center',
     },
     emoji: { fontSize: 72, marginBottom: 16 },
     title: {
-        fontSize: 28, fontWeight: '800', color: '#1A1A1A',
+        fontSize: 28, fontWeight: '800', color: '#FFFFFF',
         marginBottom: 6, textAlign: 'center', letterSpacing: -0.5,
     },
-    subtitle: { fontSize: 15, color: '#999', marginBottom: 28, textAlign: 'center' },
+    subtitle: { fontSize: 15, color: '#9A9A9A', marginBottom: 28, textAlign: 'center' },
 
     summaryGrid: { width: '100%', gap: 10, marginBottom: 36 },
     summaryCard: {
-        backgroundColor: '#F7F7F7', borderRadius: 14,
+        backgroundColor: '#161616', borderRadius: 14,
         paddingHorizontal: 18, paddingVertical: 14,
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     },
-    summaryLabel: { fontSize: 13, color: '#999', fontWeight: '600' },
-    summaryValue: { fontSize: 14, color: '#1A1A1A', fontWeight: '700', flexShrink: 1, textAlign: 'right', marginLeft: 12 },
+    summaryLabel: { fontSize: 13, color: '#9A9A9A', fontWeight: '600' },
+    summaryValue: { fontSize: 14, color: '#FFFFFF', fontWeight: '700', flexShrink: 1, textAlign: 'right', marginLeft: 12 },
 
     primaryButton: {
         backgroundColor: '#FA4A0C', borderRadius: 16,
@@ -175,5 +175,5 @@ const styles = StyleSheet.create({
     loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 
     backButton: { marginTop: 20, padding: 16 },
-    backButtonText: { color: '#AAA', fontSize: 15, fontWeight: '500' },
+    backButtonText: { color: '#9A9A9A', fontSize: 15, fontWeight: '500' },
 });

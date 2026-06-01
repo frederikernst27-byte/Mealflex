@@ -7,8 +7,9 @@ import {
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withDelay, withSequence } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useCalorie, MealType, ParsedFood, CalorieLog } from '../context/CalorieContext';
+import { colors } from '../theme';
 
-const ORANGE = '#FA4A0C';
+const ORANGE = colors.primary;
 
 const MEAL_LABELS: Record<MealType, string> = {
     breakfast: '🌅 Frühstück',
@@ -126,7 +127,7 @@ function MealInputModal({ visible, onClose, onAdd }: {
                     {/* Header */}
                     <View style={styles.modalHeader}>
                         <TouchableOpacity onPress={reset}>
-                            <Ionicons name="close" size={24} color="#333" />
+                            <Ionicons name="close" size={24} color={colors.text} />
                         </TouchableOpacity>
                         <Text style={styles.modalTitle}>Mahlzeit eintragen</Text>
                         <View style={{ width: 24 }} />
@@ -247,7 +248,7 @@ function LogCard({ log, onDelete }: { log: CalorieLog; onDelete: () => void }) {
                 <View style={styles.logCardHeader}>
                     <Text style={styles.logMealType}>{MEAL_LABELS[log.meal_type]}</Text>
                     <TouchableOpacity onPress={onDelete}>
-                        <Ionicons name="trash-outline" size={16} color="#CCC" />
+                        <Ionicons name="trash-outline" size={16} color={colors.muted} />
                     </TouchableOpacity>
                 </View>
                 {log.raw_text && (
@@ -357,7 +358,7 @@ export default function CalorieTrackerScreen() {
                 {/* Datumsnavigation */}
                 <View style={styles.dateNav}>
                     <TouchableOpacity style={styles.dateArrow} onPress={() => changeDate(-1)}>
-                        <Ionicons name="chevron-back" size={22} color="#333" />
+                        <Ionicons name="chevron-back" size={22} color={colors.text} />
                     </TouchableOpacity>
                     <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
                     <TouchableOpacity
@@ -365,7 +366,7 @@ export default function CalorieTrackerScreen() {
                         onPress={() => changeDate(1)}
                         disabled={isToday}
                     >
-                        <Ionicons name="chevron-forward" size={22} color="#333" />
+                        <Ionicons name="chevron-forward" size={22} color={colors.text} />
                     </TouchableOpacity>
                 </View>
 
@@ -430,7 +431,7 @@ export default function CalorieTrackerScreen() {
 
                     {dayLogs.length === 0 ? (
                         <View style={styles.emptyLogs}>
-                            <Ionicons name="restaurant-outline" size={48} color="#E0E0E0" />
+                            <Ionicons name="restaurant-outline" size={48} color={colors.border} />
                             <Text style={styles.emptyLogsText}>Noch nichts eingetragen</Text>
                             <Text style={styles.emptyLogsSub}>Tippe auf + um deine erste Mahlzeit zu loggen</Text>
                         </View>
@@ -468,104 +469,104 @@ export default function CalorieTrackerScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8F8F8' },
+    container: { flex: 1, backgroundColor: colors.background },
     header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    headerTitle: { fontSize: 28, fontWeight: '800', color: '#111' },
-    exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: '#FFF5F0', borderWidth: 1, borderColor: '#FFD5C8' },
-    exportBtnText: { fontSize: 13, color: '#FA4A0C', fontWeight: '700' },
+    headerTitle: { fontSize: 28, fontWeight: '800', color: colors.text },
+    exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
+    exportBtnText: { fontSize: 13, color: colors.primary, fontWeight: '700' },
 
     // Date Nav
     dateNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 16 },
-    dateArrow: { padding: 8, borderRadius: 20, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
-    dateText: { fontSize: 18, fontWeight: '700', color: '#222', minWidth: 120, textAlign: 'center' },
+    dateArrow: { padding: 8, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+    dateText: { fontSize: 18, fontWeight: '700', color: colors.text, minWidth: 120, textAlign: 'center' },
 
     // Kcal Card
-    ringCard: { margin: 16, backgroundColor: '#fff', borderRadius: 20, padding: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+    ringCard: { margin: 16, backgroundColor: colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.border },
     ringRow: { flexDirection: 'row', alignItems: 'center' },
     ringCenter: { alignItems: 'center', justifyContent: 'center', width: 110 },
-    kcalBox: { width: 110, padding: 12, borderRadius: 16, borderWidth: 3, alignItems: 'center', backgroundColor: '#FAFAFA' },
-    kcalProgressTrack: { width: '100%', height: 5, backgroundColor: '#EEE', borderRadius: 3, overflow: 'hidden', marginTop: 6 },
+    kcalBox: { width: 110, padding: 12, borderRadius: 16, borderWidth: 3, alignItems: 'center', backgroundColor: colors.surfaceAlt },
+    kcalProgressTrack: { width: '100%', height: 5, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden', marginTop: 6 },
     kcalProgressFill: { height: 5, borderRadius: 3 },
-    kcalGoalText: { fontSize: 10, color: '#AAA', marginTop: 4 },
+    kcalGoalText: { fontSize: 10, color: colors.muted, marginTop: 4 },
     ringKcal: { fontSize: 22, fontWeight: '900' },
-    ringKcalSub: { fontSize: 11, color: '#999', marginTop: 1 },
+    ringKcalSub: { fontSize: 11, color: colors.muted, marginTop: 1 },
 
     // Macro Bars
     macroBar: { marginBottom: 10 },
     macroBarHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-    macroLabel: { fontSize: 12, color: '#666', fontWeight: '600' },
+    macroLabel: { fontSize: 12, color: colors.muted, fontWeight: '600' },
     macroValue: { fontSize: 12, fontWeight: '700' },
-    macroTrack: { height: 6, backgroundColor: '#F0F0F0', borderRadius: 3, overflow: 'hidden' },
+    macroTrack: { height: 6, backgroundColor: colors.surfaceAlt, borderRadius: 3, overflow: 'hidden' },
     macroFill: { height: 6, borderRadius: 3 },
 
     // Iron
-    ironRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, padding: 10, backgroundColor: '#F0FFF4', borderRadius: 10 },
-    ironRowLow: { backgroundColor: '#FFF8E7' },
-    ironLabel: { fontSize: 13, color: '#34C759', fontWeight: '600' },
+    ironRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, padding: 10, backgroundColor: colors.successSoft, borderRadius: 10 },
+    ironRowLow: { backgroundColor: colors.warningSoft },
+    ironLabel: { fontSize: 13, color: colors.success, fontWeight: '600' },
 
     // Week Chart
-    weekCard: { marginHorizontal: 16, marginBottom: 16, backgroundColor: '#fff', borderRadius: 20, padding: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
-    cardTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 16 },
+    weekCard: { marginHorizontal: 16, marginBottom: 16, backgroundColor: colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.border },
+    cardTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 16 },
     weekChart: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-around', height: 100 },
     weekBar: { alignItems: 'center', flex: 1 },
     weekBarFill: { width: 24, borderRadius: 6, marginBottom: 6 },
-    weekBarLabel: { fontSize: 11, color: '#666' },
+    weekBarLabel: { fontSize: 11, color: colors.muted },
     weekLegend: { flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 12 },
     legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     legendDot: { width: 8, height: 8, borderRadius: 4 },
-    legendText: { fontSize: 11, color: '#666' },
+    legendText: { fontSize: 11, color: colors.muted },
 
     // Logs
     logsSection: { marginHorizontal: 16 },
     emptyLogs: { alignItems: 'center', paddingVertical: 40 },
-    emptyLogsText: { fontSize: 16, fontWeight: '600', color: '#999', marginTop: 12 },
-    emptyLogsSub: { fontSize: 13, color: '#CCC', marginTop: 6, textAlign: 'center' },
+    emptyLogsText: { fontSize: 16, fontWeight: '600', color: colors.muted, marginTop: 12 },
+    emptyLogsSub: { fontSize: 13, color: colors.mutedSoft, marginTop: 6, textAlign: 'center' },
 
     // Log Card
-    logCard: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 14, marginBottom: 10, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
+    logCard: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 14, marginBottom: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
     logCardAccent: { width: 4 },
     logCardContent: { flex: 1, padding: 14 },
     logCardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-    logMealType: { fontSize: 14, fontWeight: '700', color: '#333' },
-    logRawText: { fontSize: 12, color: '#999', marginBottom: 6 },
+    logMealType: { fontSize: 14, fontWeight: '700', color: colors.text },
+    logRawText: { fontSize: 12, color: colors.muted, marginBottom: 6 },
     logMacros: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
     logKcal: { fontSize: 15, fontWeight: '800', color: ORANGE },
-    logMacroDetail: { fontSize: 12, color: '#888' },
-    ironPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#FFF8E7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
-    ironText: { fontSize: 11, color: '#FF9500', fontWeight: '600' },
+    logMacroDetail: { fontSize: 12, color: colors.muted },
+    ironPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.warningSoft, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
+    ironText: { fontSize: 11, color: colors.warning, fontWeight: '600' },
 
     // FAB
     fabWrapper: { position: 'absolute', bottom: 30, right: 24 },
     fab: { width: 60, height: 60, borderRadius: 30, backgroundColor: ORANGE, alignItems: 'center', justifyContent: 'center', shadowColor: ORANGE, shadowOpacity: 0.5, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
 
     // Modal
-    modalContainer: { flex: 1, backgroundColor: '#F8F8F8' },
-    modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-    modalTitle: { fontSize: 18, fontWeight: '800', color: '#111' },
+    modalContainer: { flex: 1, backgroundColor: colors.background },
+    modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, backgroundColor: colors.background, borderBottomWidth: 1, borderBottomColor: colors.border },
+    modalTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
 
-    inputLabel: { fontSize: 13, fontWeight: '700', color: '#666', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-    textInput: { backgroundColor: '#fff', borderRadius: 16, padding: 16, fontSize: 16, color: '#111', minHeight: 130, textAlignVertical: 'top', borderWidth: 1, borderColor: '#F0F0F0', marginBottom: 8, lineHeight: 24 },
-    inputHint: { fontSize: 12, color: '#C0C0C0', marginBottom: 24, lineHeight: 18 },
+    inputLabel: { fontSize: 13, fontWeight: '700', color: colors.muted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    textInput: { backgroundColor: colors.surface, borderRadius: 16, padding: 16, fontSize: 16, color: colors.text, minHeight: 130, textAlignVertical: 'top', borderWidth: 1, borderColor: colors.border, marginBottom: 8, lineHeight: 24 },
+    inputHint: { fontSize: 12, color: colors.mutedSoft, marginBottom: 24, lineHeight: 18 },
 
-    mealTypeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F0F0F0', marginRight: 8 },
-    mealTypeChipText: { fontSize: 14, fontWeight: '600', color: '#555' },
+    mealTypeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border, marginRight: 8 },
+    mealTypeChipText: { fontSize: 14, fontWeight: '600', color: colors.muted },
 
     primaryBtn: { backgroundColor: ORANGE, borderRadius: 16, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
     primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 
     // Confirm
-    confirmSummary: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16 },
-    confirmTitle: { fontSize: 16, fontWeight: '800', color: '#111', marginBottom: 4 },
+    confirmSummary: { backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border },
+    confirmTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginBottom: 4 },
     confirmKcal: { fontSize: 14, color: ORANGE, fontWeight: '700' },
-    parsedItem: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' },
+    parsedItem: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 1, borderColor: colors.border },
     parsedItemLeft: {},
-    parsedFoodName: { fontSize: 15, fontWeight: '700', color: '#222' },
-    parsedFoodAmount: { fontSize: 13, color: '#999', marginTop: 2 },
+    parsedFoodName: { fontSize: 15, fontWeight: '700', color: colors.text },
+    parsedFoodAmount: { fontSize: 13, color: colors.muted, marginTop: 2 },
     parsedItemRight: { alignItems: 'flex-end' },
     parsedKcal: { fontSize: 15, fontWeight: '800', color: ORANGE },
-    parsedMacros: { fontSize: 12, color: '#AAA', marginTop: 2 },
-    noFoodsText: { textAlign: 'center', color: '#999', marginVertical: 20 },
+    parsedMacros: { fontSize: 12, color: colors.muted, marginTop: 2 },
+    noFoodsText: { textAlign: 'center', color: colors.muted, marginVertical: 20 },
     confirmButtons: { flexDirection: 'row', marginTop: 16 },
-    backBtn: { backgroundColor: '#F0F0F0', borderRadius: 16, paddingVertical: 16, paddingHorizontal: 20, alignItems: 'center' },
-    backBtnText: { color: '#555', fontSize: 15, fontWeight: '700' },
+    backBtn: { backgroundColor: colors.surfaceAlt, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 20, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+    backBtnText: { color: colors.textSoft, fontSize: 15, fontWeight: '700' },
 });

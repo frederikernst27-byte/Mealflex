@@ -9,10 +9,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Recipe } from '../types/recipe';
+import { colors } from '../theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.35;
-const ORANGE = '#FA4A0C';
+const ORANGE = colors.primary;
 
 // ── Recipe Card Content ────────────────────────────────────────────────────────
 function RecipeCardContent({ recipe }: { recipe: Recipe }) {
@@ -40,16 +41,16 @@ function RecipeCardContent({ recipe }: { recipe: Recipe }) {
 
                 {/* Macro Pills */}
                 <View style={cardStyles.macroRow}>
-                    <View style={[cardStyles.macroPill, { backgroundColor: '#FFF3EE' }]}>
+                    <View style={[cardStyles.macroPill, { backgroundColor: colors.primarySoft }]}>
                         <Text style={[cardStyles.macroValue, { color: ORANGE }]}>{recipe.calories}</Text>
                         <Text style={cardStyles.macroUnit}>kcal</Text>
                     </View>
-                    <View style={[cardStyles.macroPill, { backgroundColor: '#EEF9F0' }]}>
+                    <View style={[cardStyles.macroPill, { backgroundColor: colors.successSoft }]}>
                         <Text style={[cardStyles.macroValue, { color: '#34C759' }]}>{recipe.macros.protein}g</Text>
                         <Text style={cardStyles.macroUnit}>Protein</Text>
                     </View>
-                    <View style={[cardStyles.macroPill, { backgroundColor: '#EEF0FF' }]}>
-                        <Text style={[cardStyles.macroValue, { color: '#5856D6' }]}>{recipe.prepTime} min</Text>
+                    <View style={[cardStyles.macroPill, { backgroundColor: 'rgba(88,86,214,0.18)' }]}>
+                        <Text style={[cardStyles.macroValue, { color: '#7B79FF' }]}>{recipe.prepTime} min</Text>
                         <Text style={cardStyles.macroUnit}>Zeit</Text>
                     </View>
                 </View>
@@ -242,7 +243,7 @@ export function SwipeDeckModal({ visible, onClose, recipes, onAccept, dayName }:
                 {/* Header */}
                 <View style={modalStyles.header}>
                     <TouchableOpacity onPress={onClose} style={modalStyles.closeBtn}>
-                        <Ionicons name="close" size={22} color="#333" />
+                        <Ionicons name="close" size={22} color={colors.text} />
                     </TouchableOpacity>
                     <View style={modalStyles.headerCenter}>
                         <Text style={modalStyles.title}>Rezept wählen</Text>
@@ -301,36 +302,38 @@ const cardStyles = StyleSheet.create({
         alignSelf: 'center',
     },
     card: {
-        backgroundColor: '#FFF',
+        backgroundColor: colors.surface,
         borderRadius: 24,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: colors.border,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
+        shadowOpacity: 0.5,
         shadowRadius: 20,
         elevation: 8,
     },
     image: { width: '100%', height: 220 },
     imagePlaceholder: {
         width: '100%', height: 220,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: colors.surfaceAlt,
         alignItems: 'center', justifyContent: 'center',
     },
     imagePlaceholderEmoji: { fontSize: 60 },
-    imagePlaceholderText: { fontSize: 16, color: '#999', marginTop: 8, fontWeight: '600' },
+    imagePlaceholderText: { fontSize: 16, color: colors.muted, marginTop: 8, fontWeight: '600' },
     content: { padding: 20 },
     cuisineTag: {
         alignSelf: 'flex-start',
-        backgroundColor: '#FFF3EE', paddingHorizontal: 10, paddingVertical: 4,
+        backgroundColor: colors.primarySoft, paddingHorizontal: 10, paddingVertical: 4,
         borderRadius: 12, marginBottom: 10,
     },
     cuisineText: { fontSize: 12, color: ORANGE, fontWeight: '700' },
-    title: { fontSize: 22, fontWeight: '800', color: '#111', marginBottom: 6, lineHeight: 28 },
-    description: { fontSize: 14, color: '#888', lineHeight: 20, marginBottom: 16 },
+    title: { fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 6, lineHeight: 28 },
+    description: { fontSize: 14, color: colors.muted, lineHeight: 20, marginBottom: 16 },
     macroRow: { flexDirection: 'row', gap: 8 },
     macroPill: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 12 },
     macroValue: { fontSize: 16, fontWeight: '800' },
-    macroUnit: { fontSize: 11, color: '#AAA', marginTop: 2 },
+    macroUnit: { fontSize: 11, color: colors.muted, marginTop: 2 },
 
     // Overlays
     overlayRight: {
@@ -348,33 +351,33 @@ const deckStyles = StyleSheet.create({
     deck: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     emptyState: { alignItems: 'center', paddingVertical: 40, gap: 12 },
     emptyEmoji: { fontSize: 56 },
-    emptyTitle: { fontSize: 20, fontWeight: '800', color: '#333' },
-    emptyText: { fontSize: 14, color: '#999', textAlign: 'center', paddingHorizontal: 30, lineHeight: 20 },
+    emptyTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
+    emptyText: { fontSize: 14, color: colors.muted, textAlign: 'center', paddingHorizontal: 30, lineHeight: 20 },
 });
 
 const modalStyles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F8F8F8' },
+    container: { flex: 1, backgroundColor: colors.background },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16,
-        backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
+        backgroundColor: colors.background, borderBottomWidth: 1, borderBottomColor: colors.border,
     },
-    closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F0F0F0', alignItems: 'center', justifyContent: 'center' },
+    closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     headerCenter: { alignItems: 'center' },
-    title: { fontSize: 18, fontWeight: '800', color: '#111' },
-    subtitle: { fontSize: 13, color: '#999', marginTop: 2 },
+    title: { fontSize: 18, fontWeight: '800', color: colors.text },
+    subtitle: { fontSize: 13, color: colors.muted, marginTop: 2 },
 
     hintRow: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 20, paddingVertical: 12, backgroundColor: '#FFF',
-        borderBottomWidth: 1, borderBottomColor: '#F5F5F5',
+        paddingHorizontal: 20, paddingVertical: 12, backgroundColor: colors.background,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
     },
     hintChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     hintText: { fontSize: 12, fontWeight: '700' },
-    hintCenter: { fontSize: 12, color: '#CCC' },
+    hintCenter: { fontSize: 12, color: colors.muted },
 
     deckContainer: { flex: 1, paddingTop: 20 },
-    counter: { textAlign: 'center', fontSize: 12, color: '#CCC', paddingBottom: 20 },
+    counter: { textAlign: 'center', fontSize: 12, color: colors.muted, paddingBottom: 20 },
 
     closeAction: {
         marginTop: 12, backgroundColor: ORANGE, paddingHorizontal: 28, paddingVertical: 14,
