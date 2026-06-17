@@ -97,10 +97,16 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data }) => {
-            setSession(data.session);
-            setIsLoading(false);
-        });
+        supabase.auth.getSession()
+            .then(({ data }) => {
+                setSession(data.session);
+            })
+            .catch(() => {
+                // Network unavailable — show login screen, user can retry manually
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
 
         const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
