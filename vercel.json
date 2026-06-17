@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npx expo export --platform web --output-dir dist",
+  "outputDirectory": "dist",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": null,
+  "env": {
+    "EXPO_NO_DOCTOR": "1"
+  }
+}
