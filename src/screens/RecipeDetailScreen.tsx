@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert, Share } from 'react-native';
+import React from 'react';
+import {
+    View, Text, StyleSheet, ScrollView, TouchableOpacity,
+    Alert, Share, Image, Dimensions,
+} from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMealplan } from '../context/MealplanContext';
 import { useCalorie } from '../context/CalorieContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,9 +12,13 @@ import { MealSlot } from '../types/mealplan';
 import { Recipe } from '../types/recipe';
 import { colors } from '../theme';
 
+const { width } = Dimensions.get('window');
+const HERO_HEIGHT = width * 0.75;
+
 export default function RecipeDetailScreen() {
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
+    const insets = useSafeAreaInsets();
     const {
         toggleCookedStatus,
         likedRecipes,
@@ -18,7 +26,7 @@ export default function RecipeDetailScreen() {
         favoriteRecipes,
         toggleLike,
         toggleDislike,
-        toggleFavorite
+        toggleFavorite,
     } = useMealplan();
 
     const params = route.params ?? {};
@@ -29,18 +37,14 @@ export default function RecipeDetailScreen() {
 
     if (!recipe) {
         return (
-            <SafeAreaView style={styles.safeArea}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Rezept</Text>
-                    <View style={styles.favoriteButton} />
-                </View>
-                <View style={styles.content}>
+            <View style={[styles.safeArea, { paddingTop: insets.top }]}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.overlayBtn, { top: insets.top + 12 }]}>
+                    <Ionicons name="arrow-back" size={20} color={colors.text} />
+                </TouchableOpacity>
+                <View style={styles.center}>
                     <Text style={styles.sectionTitle}>Rezept konnte nicht geladen werden.</Text>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
@@ -63,7 +67,6 @@ export default function RecipeDetailScreen() {
         const newCooked = !mealSlot.cooked;
         toggleCookedStatus(dayIndex, mealSlot.id, newCooked);
 
-        // E14-T09: Auto-import Kalorien wenn als gekocht markiert
         if (newCooked && recipe.calories > 0) {
             Alert.alert(
                 '🍽️ In Tracker übernehmen?',
@@ -102,141 +105,245 @@ export default function RecipeDetailScreen() {
         }
     };
 
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Rezept</Text>
-                <TouchableOpacity style={styles.favoriteButton} onPress={() => toggleFavorite(recipe.id)}>
-                    <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? colors.primary : colors.text} />
-                </TouchableOpacity>
-            </View>
+    const topOffset = insets.top + 12;
 
-            <ScrollView style={styles.scrollArea}>
-                <View style={styles.content}>
+    return (
+        <View style={styles.safeArea}>
+            <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} bounces={false}>
+                {/* Hero Image */}
+                <View style={styles.heroContainer}>
+                    {recipe.imageUrl ? (
+                        <Image source={{ uri: recipe.imageUrl }} style={styles.heroImage} resizeMode="cover" />
+                    ) : (
+                        <View style={[styles.heroImage, styles.heroPlaceholder]}>
+                            <Text style={styles.heroEmoji}>🍽️</Text>
+                        </View>
+                    )}
+                    {/* Gradient-like dark overlay at bottom of image */}
+                    <View style={styles.heroGradient} pointerEvents="none" />
+                </View>
+
+                {/* Content Card */}
+                <View style={styles.card}>
+                    {/* Title + Like/Dislike */}
                     <View style={styles.titleRow}>
                         <Text style={styles.title}>{recipe.title}</Text>
-                        <View style={styles.feedbackContainer}>
-                            <TouchableOpacity style={[styles.feedbackButton, isLiked && styles.feedbackActiveLike]} onPress={() => toggleLike(recipe.id)}>
-                                <Ionicons name={isLiked ? "thumbs-up" : "thumbs-up-outline"} size={20} color={isLiked ? "#FFF" : colors.muted} />
+                        <View style={styles.feedbackRow}>
+                            <TouchableOpacity
+                                style={[styles.feedbackBtn, isLiked && styles.feedbackLiked]}
+                                onPress={() => toggleLike(recipe.id)}
+                            >
+                                <Ionicons name={isLiked ? 'thumbs-up' : 'thumbs-up-outline'} size={18} color={isLiked ? '#FFF' : colors.muted} />
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.feedbackButton, isDisliked && styles.feedbackActiveDislike]} onPress={() => toggleDislike(recipe.id)}>
-                                <Ionicons name={isDisliked ? "thumbs-down" : "thumbs-down-outline"} size={20} color={isDisliked ? "#FFF" : colors.muted} />
+                            <TouchableOpacity
+                                style={[styles.feedbackBtn, isDisliked && styles.feedbackDisliked]}
+                                onPress={() => toggleDislike(recipe.id)}
+                            >
+                                <Ionicons name={isDisliked ? 'thumbs-down' : 'thumbs-down-outline'} size={18} color={isDisliked ? '#FFF' : colors.muted} />
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <Text style={styles.description}>{recipe.description}</Text>
 
-                    <View style={styles.metaContainer}>
-                        <View style={styles.metaBadge}>
-                            <Ionicons name="time-outline" size={16} color="#FA4A0C" />
-                            <Text style={styles.metaText}>{recipe.prepTime} Min</Text>
+                    {/* Cuisine / Tags */}
+                    {(recipe.cuisine || recipe.prepTime) && (
+                        <View style={styles.subtitleRow}>
+                            {recipe.cuisine && (
+                                <View style={styles.subtitleChip}>
+                                    <Ionicons name="location-outline" size={13} color={colors.muted} />
+                                    <Text style={styles.subtitleText}>{recipe.cuisine}</Text>
+                                </View>
+                            )}
+                            <View style={styles.subtitleChip}>
+                                <Ionicons name="time-outline" size={13} color={colors.muted} />
+                                <Text style={styles.subtitleText}>{recipe.prepTime} Min</Text>
+                            </View>
                         </View>
-                        <View style={styles.metaBadge}>
-                            <Ionicons name="flame-outline" size={16} color="#FA4A0C" />
-                            <Text style={styles.metaText}>{recipe.calories} kcal</Text>
+                    )}
+
+                    {/* Macro Row */}
+                    <View style={styles.macroRow}>
+                        <View style={styles.macroItem}>
+                            <Text style={styles.macroValue}>{recipe.calories}</Text>
+                            <Text style={styles.macroLabel}>kcal</Text>
+                        </View>
+                        <View style={styles.macroDivider} />
+                        <View style={styles.macroItem}>
+                            <Text style={styles.macroValue}>{recipe.macros.protein}</Text>
+                            <Text style={styles.macroLabel}>Protein</Text>
+                        </View>
+                        <View style={styles.macroDivider} />
+                        <View style={styles.macroItem}>
+                            <Text style={styles.macroValue}>{recipe.macros.fat}</Text>
+                            <Text style={styles.macroLabel}>Fett</Text>
+                        </View>
+                        <View style={styles.macroDivider} />
+                        <View style={styles.macroItem}>
+                            <Text style={styles.macroValue}>{recipe.macros.carbs}</Text>
+                            <Text style={styles.macroLabel}>Carbs</Text>
                         </View>
                     </View>
 
-                    <Text style={styles.sectionTitle}>Zutaten ({recipe.portions} Portion)</Text>
-                    <View style={styles.ingredientsBox}>
-                        {recipe.ingredients.map((ing, idx) => (
-                            <View key={idx} style={styles.ingredientRow}>
-                                <Text style={styles.ingredientName}>• {ing.name}</Text>
-                                <Text style={styles.ingredientAmount}>{ing.amount} {ing.unit}</Text>
+                    {/* Description */}
+                    {recipe.description ? (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Beschreibung</Text>
+                            <Text style={styles.description}>{recipe.description}</Text>
+                        </View>
+                    ) : null}
+
+                    {/* Ingredients */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Zutaten ({recipe.portions} Portion)</Text>
+                        <View style={styles.ingredientsBox}>
+                            {recipe.ingredients.map((ing, idx) => (
+                                <View key={idx} style={[styles.ingredientRow, idx < recipe.ingredients.length - 1 && styles.ingredientRowBorder]}>
+                                    <Text style={styles.ingredientName}>{ing.name}</Text>
+                                    <Text style={styles.ingredientAmount}>{ing.amount} {ing.unit}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Steps */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Zubereitung</Text>
+                        {recipe.steps.map((step, idx) => (
+                            <View key={idx} style={styles.stepRow}>
+                                <View style={styles.stepBadge}>
+                                    <Text style={styles.stepBadgeText}>{idx + 1}</Text>
+                                </View>
+                                <Text style={styles.stepText}>{step}</Text>
                             </View>
                         ))}
                     </View>
 
-                    <Text style={styles.sectionTitle}>Zubereitung</Text>
-                    {recipe.steps.map((step, idx) => (
-                        <View key={idx} style={styles.stepRow}>
-                            <View style={styles.stepNumberBadge}>
-                                <Text style={styles.stepNumberText}>{idx + 1}</Text>
-                            </View>
-                            <Text style={styles.stepText}>{step}</Text>
-                        </View>
-                    ))}
-
-                    <View style={styles.macrosContainer}>
-                        <Text style={styles.sectionTitle}>Makros</Text>
-                        <View style={styles.macrosRow}>
-                            <View style={styles.macroCard}><Text style={styles.macroValue}>{recipe.macros.protein}g</Text><Text style={styles.macroLabel}>Protein</Text></View>
-                            <View style={styles.macroCard}><Text style={styles.macroValue}>{recipe.macros.carbs}g</Text><Text style={styles.macroLabel}>Carbs</Text></View>
-                            <View style={styles.macroCard}><Text style={styles.macroValue}>{recipe.macros.fat}g</Text><Text style={styles.macroLabel}>Fat</Text></View>
-                        </View>
-                    </View>
+                    <View style={{ height: 100 }} />
                 </View>
-                <View style={{ height: 40 }} />
             </ScrollView>
 
-            <View style={styles.footerAction}>
-                <TouchableOpacity style={styles.shareButton} onPress={handleShareIngredients}>
-                    <Ionicons name="cart-outline" size={20} color="#FA4A0C" />
-                    <Text style={styles.shareButtonText}>Zutaten teilen</Text>
+            {/* Overlay Buttons (back + favorite) */}
+            <TouchableOpacity style={[styles.overlayBtn, { top: topOffset, left: 16 }]} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={20} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.overlayBtn, { top: topOffset, right: 16 }]} onPress={() => toggleFavorite(recipe.id)}>
+                <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={20} color={isFavorite ? colors.primary : colors.text} />
+            </TouchableOpacity>
+
+            {/* Fixed Bottom Action */}
+            <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
+                <TouchableOpacity style={styles.cartBtn} onPress={handleShareIngredients}>
+                    <Ionicons name="cart-outline" size={22} color={colors.primary} />
                 </TouchableOpacity>
                 {mealSlot ? (
                     <TouchableOpacity
-                        style={[styles.primaryButton, mealSlot.cooked && styles.cookedButton, { flex: 1, marginLeft: 12 }]}
+                        style={[styles.primaryBtn, mealSlot.cooked && styles.cookedBtn]}
                         onPress={handleToggleCooked}
                     >
-                        <Ionicons name={mealSlot.cooked ? "checkmark-done-circle" : "checkmark-circle-outline"} size={22} color="#FFF" />
-                        <Text style={styles.primaryButtonText}>
-                            {mealSlot.cooked ? 'Ungekocht' : 'Gekocht'}
+                        <Ionicons name={mealSlot.cooked ? 'checkmark-done-circle' : 'checkmark-circle-outline'} size={20} color="#FFF" />
+                        <Text style={styles.primaryBtnText}>
+                            {mealSlot.cooked ? 'Als ungekocht markieren' : 'Als gekocht markieren'}
                         </Text>
                     </TouchableOpacity>
                 ) : (
-                    <TouchableOpacity
-                        style={[styles.primaryButton, { flex: 1, marginLeft: 12 }]}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <Ionicons name="checkmark-circle-outline" size={22} color="#FFF" />
-                        <Text style={styles.primaryButtonText}>Fertig</Text>
+                    <TouchableOpacity style={styles.primaryBtn} onPress={() => navigation.goBack()}>
+                        <Ionicons name="arrow-back-circle-outline" size={20} color="#FFF" />
+                        <Text style={styles.primaryBtnText}>Zurück</Text>
                     </TouchableOpacity>
                 )}
             </View>
-        </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.background },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
-    backButton: { padding: 8 },
-    headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
-    favoriteButton: { padding: 8 },
-    scrollArea: { flex: 1 },
-    content: { padding: 24 },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    scroll: { flex: 1 },
+
+    heroContainer: { width, height: HERO_HEIGHT, position: 'relative' },
+    heroImage: { width, height: HERO_HEIGHT },
+    heroPlaceholder: { backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    heroEmoji: { fontSize: 72 },
+    heroGradient: {
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
+        backgroundColor: 'transparent',
+        // fades image into card below via background — subtle shadow effect
+    },
+
+    overlayBtn: {
+        position: 'absolute',
+        width: 40, height: 40, borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.92)',
+        alignItems: 'center', justifyContent: 'center',
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 4,
+        zIndex: 10,
+    },
+
+    card: {
+        backgroundColor: colors.background,
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        marginTop: -24,
+        paddingHorizontal: 20,
+        paddingTop: 24,
+    },
+
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
-    title: { flex: 1, fontSize: 32, fontWeight: '800', color: colors.text, marginRight: 16 },
-    feedbackContainer: { flexDirection: 'row', gap: 8 },
-    feedbackButton: { padding: 10, backgroundColor: colors.surfaceAlt, borderRadius: 20 },
-    feedbackActiveLike: { backgroundColor: colors.success },
-    feedbackActiveDislike: { backgroundColor: colors.danger },
-    description: { fontSize: 16, color: colors.muted, lineHeight: 24, marginBottom: 16 },
-    metaContainer: { flexDirection: 'row', gap: 12, marginBottom: 32 },
-    metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primarySoft, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
-    metaText: { color: colors.primary, fontWeight: 'bold', marginLeft: 6, fontSize: 14 },
-    sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: 16, marginTop: 12 },
-    ingredientsBox: { backgroundColor: colors.surface, borderRadius: 16, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: colors.border },
-    ingredientRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-    ingredientName: { fontSize: 16, color: colors.textSoft },
-    ingredientAmount: { fontSize: 16, fontWeight: '600', color: colors.text },
-    stepRow: { flexDirection: 'row', marginBottom: 16 },
-    stepNumberBadge: { backgroundColor: colors.primary, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16, marginTop: 2 },
-    stepNumberText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
-    stepText: { flex: 1, fontSize: 16, color: colors.textSoft, lineHeight: 24 },
-    macrosContainer: { marginTop: 20, padding: 20, backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border },
-    macrosRow: { flexDirection: 'row', justifyContent: 'space-around' },
-    macroCard: { alignItems: 'center' },
+    title: { flex: 1, fontSize: 26, fontWeight: '800', color: colors.text, letterSpacing: -0.5, marginRight: 12 },
+    feedbackRow: { flexDirection: 'row', gap: 8 },
+    feedbackBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    feedbackLiked: { backgroundColor: colors.success },
+    feedbackDisliked: { backgroundColor: colors.danger },
+
+    subtitleRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+    subtitleChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    subtitleText: { fontSize: 13, color: colors.muted },
+
+    macroRow: {
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: colors.surface, borderRadius: 18,
+        paddingVertical: 16, marginBottom: 24,
+        borderWidth: 1, borderColor: colors.border,
+    },
+    macroItem: { flex: 1, alignItems: 'center', gap: 3 },
     macroValue: { fontSize: 20, fontWeight: '800', color: colors.text },
-    macroLabel: { fontSize: 12, color: colors.muted, textTransform: 'uppercase', marginTop: 4 },
-    footerAction: { flexDirection: 'row', padding: 16, backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border, alignItems: 'center' },
-    shareButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 14, borderWidth: 1.5, borderColor: colors.primary, backgroundColor: colors.primarySoft },
-    shareButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
-    primaryButton: { backgroundColor: colors.primary, flexDirection: 'row', borderRadius: 14, padding: 16, alignItems: 'center', justifyContent: 'center', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-    cookedButton: { backgroundColor: colors.success, shadowColor: colors.success },
-    primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '700', marginLeft: 8 },
+    macroLabel: { fontSize: 11, color: colors.muted, fontWeight: '500' },
+    macroDivider: { width: 1, height: 32, backgroundColor: colors.border },
+
+    section: { marginBottom: 24 },
+    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
+    description: { fontSize: 15, color: colors.muted, lineHeight: 23 },
+
+    ingredientsBox: { backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+    ingredientRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13 },
+    ingredientRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    ingredientName: { fontSize: 15, color: colors.textSoft },
+    ingredientAmount: { fontSize: 15, fontWeight: '600', color: colors.text },
+
+    stepRow: { flexDirection: 'row', gap: 14, marginBottom: 14 },
+    stepBadge: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 },
+    stepBadgeText: { color: '#FFF', fontWeight: '800', fontSize: 13 },
+    stepText: { flex: 1, fontSize: 15, color: colors.textSoft, lineHeight: 23 },
+
+    footer: {
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        flexDirection: 'row', alignItems: 'center', gap: 12,
+        backgroundColor: colors.background,
+        paddingHorizontal: 20, paddingTop: 14,
+        borderTopWidth: 1, borderTopColor: colors.border,
+        shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 8,
+    },
+    cartBtn: {
+        width: 52, height: 52, borderRadius: 16,
+        backgroundColor: colors.primarySoft,
+        borderWidth: 1.5, borderColor: colors.primary,
+        alignItems: 'center', justifyContent: 'center',
+    },
+    primaryBtn: {
+        flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+        backgroundColor: colors.primary, borderRadius: 16, height: 52,
+        shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+    },
+    cookedBtn: { backgroundColor: colors.success, shadowColor: colors.success },
+    primaryBtnText: { color: '#FFF', fontSize: 15, fontWeight: '700' },
 });
