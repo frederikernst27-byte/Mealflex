@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share, Alert, Modal } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withDelay } from 'react-native-reanimated';
 import { supabase } from '../../lib/supabase';
 import { useMealplan } from '../context/MealplanContext';
 import { useCommunity } from '../context/CommunityContext';
@@ -62,13 +63,59 @@ export default function HomeScreen() {
     const { activePlan, swapMealWithRecipe, checkedIngredients, toggleShoppingItem } = useMealplan();
     const { getSwapQueueRecipes, swapQueueIds, communityRecipes } = useCommunity();
     const { getDayTotals, goals } = useCalorie();
-    const { requirePro } = useSubscription();
+    const { requirePro, unlockEasterEgg } = useSubscription();
     const navigation = useNavigation<any>();
     const swapPool = getSwapQueueRecipes();
     const todayStr = new Date().toISOString().split('T')[0];
     const todayTotals = getDayTotals(todayStr);
     const [swapModal, setSwapModal] = useState<{ dayIndex: number; mealSlotId: string; dayName: string } | null>(null);
     const [activeTab, setActiveTab] = useState<'plan' | 'shopping'>('plan');
+
+    // Easter egg
+    const [eggVisible, setEggVisible] = useState(false);
+    const [weekTaps, setWeekTaps] = useState(0);
+    const lastTapRef = React.useRef(0);
+    const eggOpacity = useSharedValue(0);
+    const eggScale = useSharedValue(0.2);
+    const badgeScale = useSharedValue(0);
+    const star1Y = useSharedValue(0);
+    const star2Y = useSharedValue(0);
+    const star3Y = useSharedValue(0);
+
+    const dismissEgg = () => {
+        eggOpacity.value = withTiming(0, { duration: 600 });
+        setTimeout(() => setEggVisible(false), 650);
+    };
+
+    const triggerEgg = async () => {
+        setEggVisible(true);
+        eggOpacity.value = withTiming(1, { duration: 400 });
+        eggScale.value = withSpring(1, { damping: 7, stiffness: 100 });
+        badgeScale.value = withDelay(300, withSpring(1, { damping: 6, stiffness: 120 }));
+        star1Y.value = withDelay(200, withSpring(-80, { damping: 8, stiffness: 80 }));
+        star2Y.value = withDelay(350, withSpring(-120, { damping: 8, stiffness: 80 }));
+        star3Y.value = withDelay(500, withSpring(-60, { damping: 8, stiffness: 80 }));
+        await unlockEasterEgg();
+        setTimeout(dismissEgg, 4500);
+    };
+
+    const handleWeekTap = () => {
+        const now = Date.now();
+        const newCount = now - lastTapRef.current > 3000 ? 1 : weekTaps + 1;
+        lastTapRef.current = now;
+        setWeekTaps(newCount);
+        if (newCount >= 7) {
+            setWeekTaps(0);
+            triggerEgg();
+        }
+    };
+
+    const eggOverlayStyle = useAnimatedStyle(() => ({ opacity: eggOpacity.value }));
+    const eggCardStyle = useAnimatedStyle(() => ({ transform: [{ scale: eggScale.value }] }));
+    const badgeStyle = useAnimatedStyle(() => ({ transform: [{ scale: badgeScale.value }] }));
+    const star1Style = useAnimatedStyle(() => ({ transform: [{ translateY: star1Y.value }] }));
+    const star2Style = useAnimatedStyle(() => ({ transform: [{ translateY: star2Y.value }] }));
+    const star3Style = useAnimatedStyle(() => ({ transform: [{ translateY: star3Y.value }] }));
 
     const shoppingList = useMemo(() => {
         if (!activePlan) return [];
@@ -142,7 +189,9 @@ export default function HomeScreen() {
                 <View>
                     <Text style={styles.greeting}>Dein Wochenplan</Text>
                     {activePlan && (
-                        <Text style={styles.weekLabel}>Woche {activePlan.weekNumber}</Text>
+                        <TouchableOpacity onPress={handleWeekTap} activeOpacity={1}>
+                            <Text style={styles.weekLabel}>Woche {activePlan.weekNumber}</Text>
+                        </TouchableOpacity>
                     )}
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
@@ -344,6 +393,29 @@ export default function HomeScreen() {
                     }}
                 />
             )}
+
+            {/* Easter Egg Overlay */}
+            <Modal visible={eggVisible} transparent animationType="none" onRequestClose={dismissEgg}>
+                <Animated.View style={[eggStyles.overlay, eggOverlayStyle]}>
+                    {/* Floating stars */}
+                    <Animated.Text style={[eggStyles.star, { left: '20%' }, star1Style]}>⭐</Animated.Text>
+                    <Animated.Text style={[eggStyles.star, { left: '50%' }, star2Style]}>✨</Animated.Text>
+                    <Animated.Text style={[eggStyles.star, { left: '75%' }, star3Style]}>⭐</Animated.Text>
+
+                    <Animated.View style={[eggStyles.card, eggCardStyle]}>
+                        <Text style={eggStyles.egg}>🥚</Text>
+                        <Text style={eggStyles.title}>Easter Egg gefunden!</Text>
+                        <Text style={eggStyles.sub}>Du hast das Geheimnis entdeckt.</Text>
+                        <Animated.View style={[eggStyles.badge, badgeStyle]}>
+                            <Text style={eggStyles.badgeText}>✦ MEALFLEX PRO – KOSTENLOS ✦</Text>
+                        </Animated.View>
+                        <Text style={eggStyles.hint}>Pro wurde dauerhaft freigeschaltet 🎉</Text>
+                        <TouchableOpacity onPress={dismissEgg} style={eggStyles.closeBtn}>
+                            <Text style={eggStyles.closeBtnText}>Weiter</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </Animated.View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -466,4 +538,53 @@ const styles = StyleSheet.create({
     itemTextChecked: { textDecorationLine: 'line-through', color: colors.muted },
     shopEmpty: { alignItems: 'center', justifyContent: 'center', padding: 60, gap: 12 },
     shopEmptyText: { fontSize: 18, fontWeight: '600', color: colors.muted },
+});
+
+const eggStyles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.85)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    star: {
+        position: 'absolute',
+        bottom: '45%',
+        fontSize: 28,
+    },
+    card: {
+        backgroundColor: '#1A1A2E',
+        borderRadius: 28,
+        padding: 32,
+        alignItems: 'center',
+        gap: 12,
+        marginHorizontal: 24,
+        borderWidth: 1.5,
+        borderColor: '#FFD700',
+        shadowColor: '#FFD700',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 20,
+        elevation: 20,
+    },
+    egg: { fontSize: 64 },
+    title: { fontSize: 24, fontWeight: '800', color: '#FFD700', textAlign: 'center' },
+    sub: { fontSize: 15, color: '#AAA', textAlign: 'center' },
+    badge: {
+        backgroundColor: '#FFD700',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+        marginTop: 4,
+    },
+    badgeText: { fontSize: 13, fontWeight: '800', color: '#000', letterSpacing: 1 },
+    hint: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 4 },
+    closeBtn: {
+        marginTop: 8,
+        backgroundColor: '#FFD700',
+        paddingHorizontal: 36,
+        paddingVertical: 14,
+        borderRadius: 16,
+    },
+    closeBtnText: { color: '#000', fontWeight: '800', fontSize: 16 },
 });

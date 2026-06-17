@@ -11,6 +11,7 @@ interface SubscriptionContextType {
     refreshSubscription: () => Promise<void>;
     startCheckout: (plan: 'monthly' | 'yearly') => Promise<void>;
     requirePro: (featureName: string, onBlocked?: () => void) => boolean;
+    unlockEasterEgg: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -55,6 +56,19 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         );
     };
 
+    const unlockEasterEgg = useCallback(async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                await supabase
+                    .from('profiles')
+                    .update({ is_pro: true })
+                    .eq('id', session.user.id);
+            }
+        } catch {}
+        setStatus('pro');
+    }, []);
+
     const requirePro = (featureName: string, onBlocked?: () => void) => {
         if (status === 'pro' || status === 'trialing') return true;
         Alert.alert(
@@ -75,7 +89,8 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         refreshSubscription,
         startCheckout,
         requirePro,
-    }), [status, isLoading, refreshSubscription]);
+        unlockEasterEgg,
+    }), [status, isLoading, refreshSubscription, unlockEasterEgg]);
 
     return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
 }
