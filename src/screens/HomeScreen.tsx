@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share, Alert, Modal } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withDelay } from 'react-native-reanimated';
 import { supabase } from '../../lib/supabase';
 import { useMealplan } from '../context/MealplanContext';
 import { useCommunity } from '../context/CommunityContext';
@@ -9,6 +10,8 @@ import { MealSlot } from '../types/mealplan';
 import { SwipeDeckModal } from '../components/SwipeDeck';
 import { mockRecipes } from '../data/mockRecipes';
 import { useCalorie } from '../context/CalorieContext';
+import { aggregateShoppingList } from '../utils/ingredientParser';
+import { useSubscription } from '../context/SubscriptionContext';
 import { colors } from '../theme';
 
 const DAY_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -57,14 +60,72 @@ function MealCard({ meal, dayIndex, onSwap, onPress }: {
 }
 
 export default function HomeScreen() {
-    const { activePlan, swapMealWithRecipe } = useMealplan();
+    const { activePlan, swapMealWithRecipe, checkedIngredients, toggleShoppingItem } = useMealplan();
     const { getSwapQueueRecipes, swapQueueIds, communityRecipes } = useCommunity();
     const { getDayTotals, goals } = useCalorie();
+    const { requirePro, unlockEasterEgg } = useSubscription();
     const navigation = useNavigation<any>();
     const swapPool = getSwapQueueRecipes();
     const todayStr = new Date().toISOString().split('T')[0];
     const todayTotals = getDayTotals(todayStr);
     const [swapModal, setSwapModal] = useState<{ dayIndex: number; mealSlotId: string; dayName: string } | null>(null);
+    const [activeTab, setActiveTab] = useState<'plan' | 'shopping'>('plan');
+
+    // Easter egg
+    const [eggVisible, setEggVisible] = useState(false);
+    const [weekTaps, setWeekTaps] = useState(0);
+    const lastTapRef = React.useRef(0);
+    const eggOpacity = useSharedValue(0);
+    const eggScale = useSharedValue(0.2);
+    const badgeScale = useSharedValue(0);
+    const star1Y = useSharedValue(0);
+    const star2Y = useSharedValue(0);
+    const star3Y = useSharedValue(0);
+
+    const dismissEgg = () => {
+        eggOpacity.value = withTiming(0, { duration: 600 });
+        setTimeout(() => setEggVisible(false), 650);
+    };
+
+    const triggerEgg = async () => {
+        setEggVisible(true);
+        eggOpacity.value = withTiming(1, { duration: 400 });
+        eggScale.value = withSpring(1, { damping: 7, stiffness: 100 });
+        badgeScale.value = withDelay(300, withSpring(1, { damping: 6, stiffness: 120 }));
+        star1Y.value = withDelay(200, withSpring(-80, { damping: 8, stiffness: 80 }));
+        star2Y.value = withDelay(350, withSpring(-120, { damping: 8, stiffness: 80 }));
+        star3Y.value = withDelay(500, withSpring(-60, { damping: 8, stiffness: 80 }));
+        await unlockEasterEgg();
+        setTimeout(dismissEgg, 4500);
+    };
+
+    const handleWeekTap = () => {
+        const now = Date.now();
+        const newCount = now - lastTapRef.current > 3000 ? 1 : weekTaps + 1;
+        lastTapRef.current = now;
+        setWeekTaps(newCount);
+        if (newCount >= 7) {
+            setWeekTaps(0);
+            triggerEgg();
+        }
+    };
+
+    const eggOverlayStyle = useAnimatedStyle(() => ({ opacity: eggOpacity.value }));
+    const eggCardStyle = useAnimatedStyle(() => ({ transform: [{ scale: eggScale.value }] }));
+    const badgeStyle = useAnimatedStyle(() => ({ transform: [{ scale: badgeScale.value }] }));
+    const star1Style = useAnimatedStyle(() => ({ transform: [{ translateY: star1Y.value }] }));
+    const star2Style = useAnimatedStyle(() => ({ transform: [{ translateY: star2Y.value }] }));
+    const star3Style = useAnimatedStyle(() => ({ transform: [{ translateY: star3Y.value }] }));
+
+    const shoppingList = useMemo(() => {
+        if (!activePlan) return [];
+        const allIngredients = activePlan.days.flatMap(day =>
+            day.meals.flatMap(meal => meal.recipe.ingredients)
+        );
+        return aggregateShoppingList(allIngredients);
+    }, [activePlan]);
+    const shoppingProgress = shoppingList.length === 0 ? 0 :
+        (checkedIngredients.length / shoppingList.length) * 100;
 
     const handleSharePlan = async () => {
         if (!activePlan) return;
@@ -99,30 +160,109 @@ export default function HomeScreen() {
         ? Math.round(allMeals.reduce((s, m) => s + m.recipe.macros.carbs, 0) / activePlan!.days.length)
         : 0;
 
+    const handleBringExport = async () => {
+        if (!requirePro('Bring!-Export', () => navigation.navigate('Profile', { screen: 'Pricing' }))) return;
+        const unchecked = shoppingList.filter(
+            item => !checkedIngredients.includes(`${item.name}-${item.unit}`)
+        );
+        if (unchecked.length === 0) {
+            Alert.alert('Alles erledigt', 'Alle Artikel sind bereits abgehakt.');
+            return;
+        }
+        const text = unchecked
+            .map(item => `• ${item.amount} ${item.unit} ${item.name}`)
+            .join('\n');
+        try {
+            await Share.share({
+                message: `MealFlex Einkaufsliste\n\n${text}`,
+                title: 'MealFlex Einkaufsliste',
+            });
+        } catch {
+            Alert.alert('Fehler', 'Export konnte nicht gestartet werden.');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} bounces={true} alwaysBounceVertical={true}>
-
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.greeting}>Dein Wochenplan</Text>
-                        {activePlan && (
+            {/* Header */}
+            <View style={styles.header}>
+                <View>
+                    <Text style={styles.greeting}>Dein Wochenplan</Text>
+                    {activePlan && (
+                        <TouchableOpacity onPress={handleWeekTap} activeOpacity={1}>
                             <Text style={styles.weekLabel}>Woche {activePlan.weekNumber}</Text>
-                        )}
-                    </View>
-                    <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                        {activePlan && (
-                            <TouchableOpacity onPress={handleSharePlan} style={styles.shareBtn}>
-                                <Ionicons name="share-outline" size={18} color="#FA4A0C" />
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.logoutBtn}>
-                            <Ionicons name="log-out-outline" size={16} color="#FA4A0C" />
-                            <Text style={styles.logoutText}>Ausloggen</Text>
                         </TouchableOpacity>
-                    </View>
+                    )}
                 </View>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    {activePlan && (
+                        <TouchableOpacity onPress={handleSharePlan} style={styles.shareBtn}>
+                            <Ionicons name="share-outline" size={18} color="#FA4A0C" />
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.logoutBtn}>
+                        <Ionicons name="log-out-outline" size={16} color="#FA4A0C" />
+                        <Text style={styles.logoutText}>Ausloggen</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Segment Control */}
+            <View style={styles.segmentBar}>
+                <TouchableOpacity style={[styles.segBtn, activeTab === 'plan' && styles.segBtnActive]} onPress={() => setActiveTab('plan')}>
+                    <Text style={[styles.segBtnText, activeTab === 'plan' && styles.segBtnTextActive]}>Wochenplan</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.segBtn, activeTab === 'shopping' && styles.segBtnActive]} onPress={() => setActiveTab('shopping')}>
+                    <Text style={[styles.segBtnText, activeTab === 'shopping' && styles.segBtnTextActive]}>Einkauf</Text>
+                </TouchableOpacity>
+            </View>
+
+            {activeTab === 'shopping' ? (
+                <ScrollView style={styles.shopScroll} showsVerticalScrollIndicator={false}>
+                    {!activePlan || shoppingList.length === 0 ? (
+                        <View style={styles.shopEmpty}>
+                            <Ionicons name="cart-outline" size={64} color={colors.border} />
+                            <Text style={styles.shopEmptyText}>Deine Liste ist leer.</Text>
+                            <Text style={[styles.shopEmptyText, { fontSize: 14 }]}>Generiere erst einen Mealplan!</Text>
+                        </View>
+                    ) : (
+                        <>
+                            <Text style={styles.shopSubtitle}>
+                                Woche {activePlan.weekNumber} • {checkedIngredients.length} / {shoppingList.length} gekauft
+                            </Text>
+                            <View style={styles.shopProgress}>
+                                <View style={[styles.shopProgressFill, { width: `${shoppingProgress}%` as any }]} />
+                            </View>
+                            <TouchableOpacity style={styles.bringBtn} onPress={handleBringExport}>
+                                <Ionicons name="cart" size={16} color="#FFF" />
+                                <Text style={styles.bringBtnText}>Zu Bring! exportieren</Text>
+                            </TouchableOpacity>
+                            {shoppingList.map((item) => {
+                                const key = `${item.name}-${item.unit}`;
+                                const isChecked = checkedIngredients.includes(key);
+                                return (
+                                    <TouchableOpacity
+                                        key={key}
+                                        style={[styles.itemCard, isChecked && styles.itemCardChecked]}
+                                        onPress={() => toggleShoppingItem(key)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                                            {isChecked && <Ionicons name="checkmark" size={16} color="#FFF" />}
+                                        </View>
+                                        <View style={styles.itemInfo}>
+                                            <Text style={[styles.itemName, isChecked && styles.itemTextChecked]}>{item.name}</Text>
+                                            <Text style={[styles.itemAmount, isChecked && styles.itemTextChecked]}>{item.amount} {item.unit}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                            <View style={{ height: 32 }} />
+                        </>
+                    )}
+                </ScrollView>
+            ) : (
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} bounces={true} alwaysBounceVertical={true}>
 
                 {/* Stats Cards */}
                 {activePlan && (
@@ -238,6 +378,7 @@ export default function HomeScreen() {
 
                 <View style={{ height: 20 }} />
             </ScrollView>
+            )}
 
             {/* Tinder Swipe Deck für Rezept-Swap */}
             {swapModal && (
@@ -252,6 +393,29 @@ export default function HomeScreen() {
                     }}
                 />
             )}
+
+            {/* Easter Egg Overlay */}
+            <Modal visible={eggVisible} transparent animationType="none" onRequestClose={dismissEgg}>
+                <Animated.View style={[eggStyles.overlay, eggOverlayStyle]}>
+                    {/* Floating stars */}
+                    <Animated.Text style={[eggStyles.star, { left: '20%' }, star1Style]}>⭐</Animated.Text>
+                    <Animated.Text style={[eggStyles.star, { left: '50%' }, star2Style]}>✨</Animated.Text>
+                    <Animated.Text style={[eggStyles.star, { left: '75%' }, star3Style]}>⭐</Animated.Text>
+
+                    <Animated.View style={[eggStyles.card, eggCardStyle]}>
+                        <Text style={eggStyles.egg}>🥚</Text>
+                        <Text style={eggStyles.title}>Easter Egg gefunden!</Text>
+                        <Text style={eggStyles.sub}>Du hast das Geheimnis entdeckt.</Text>
+                        <Animated.View style={[eggStyles.badge, badgeStyle]}>
+                            <Text style={eggStyles.badgeText}>✦ MEALFLEX PRO – KOSTENLOS ✦</Text>
+                        </Animated.View>
+                        <Text style={eggStyles.hint}>Pro wurde dauerhaft freigeschaltet 🎉</Text>
+                        <TouchableOpacity onPress={dismissEgg} style={eggStyles.closeBtn}>
+                            <Text style={eggStyles.closeBtnText}>Weiter</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </Animated.View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -351,4 +515,76 @@ const styles = StyleSheet.create({
     kcalWidgetGoal: { fontSize: 12, fontWeight: '400', color: colors.muted },
     kcalWidgetTrack: { height: 4, backgroundColor: colors.surfaceAlt, borderRadius: 2, marginTop: 6, overflow: 'hidden' },
     kcalWidgetFill: { height: 4, borderRadius: 2 },
+
+    segmentBar: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, marginBottom: 4, backgroundColor: colors.surfaceAlt, borderRadius: 12, padding: 3 },
+    segBtn: { flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
+    segBtnActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 2 },
+    segBtnText: { fontSize: 14, fontWeight: '600', color: colors.muted },
+    segBtnTextActive: { color: colors.text, fontWeight: '700' },
+
+    shopSubtitle: { fontSize: 13, color: colors.muted, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
+    shopProgress: { height: 6, backgroundColor: colors.surfaceAlt, borderRadius: 3, marginHorizontal: 20, marginBottom: 12, overflow: 'hidden' },
+    shopProgressFill: { height: 6, backgroundColor: colors.success, borderRadius: 3 },
+    bringBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primary, marginHorizontal: 20, paddingVertical: 12, borderRadius: 16, marginBottom: 16 },
+    bringBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+    shopScroll: { flex: 1 },
+    itemCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: 16, borderRadius: 12, marginBottom: 10, marginHorizontal: 20, borderWidth: 1, borderColor: colors.border },
+    itemCardChecked: { backgroundColor: colors.surfaceAlt, opacity: 0.7 },
+    checkbox: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.muted, marginRight: 16, alignItems: 'center', justifyContent: 'center' },
+    checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
+    itemInfo: { flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    itemName: { fontSize: 16, fontWeight: '600', color: colors.text },
+    itemAmount: { fontSize: 16, color: colors.muted, fontWeight: '500' },
+    itemTextChecked: { textDecorationLine: 'line-through', color: colors.muted },
+    shopEmpty: { alignItems: 'center', justifyContent: 'center', padding: 60, gap: 12 },
+    shopEmptyText: { fontSize: 18, fontWeight: '600', color: colors.muted },
+});
+
+const eggStyles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.85)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    star: {
+        position: 'absolute',
+        bottom: '45%',
+        fontSize: 28,
+    },
+    card: {
+        backgroundColor: '#1A1A2E',
+        borderRadius: 28,
+        padding: 32,
+        alignItems: 'center',
+        gap: 12,
+        marginHorizontal: 24,
+        borderWidth: 1.5,
+        borderColor: '#FFD700',
+        shadowColor: '#FFD700',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 20,
+        elevation: 20,
+    },
+    egg: { fontSize: 64 },
+    title: { fontSize: 24, fontWeight: '800', color: '#FFD700', textAlign: 'center' },
+    sub: { fontSize: 15, color: '#AAA', textAlign: 'center' },
+    badge: {
+        backgroundColor: '#FFD700',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+        marginTop: 4,
+    },
+    badgeText: { fontSize: 13, fontWeight: '800', color: '#000', letterSpacing: 1 },
+    hint: { fontSize: 14, color: '#888', textAlign: 'center', marginTop: 4 },
+    closeBtn: {
+        marginTop: 8,
+        backgroundColor: '#FFD700',
+        paddingHorizontal: 36,
+        paddingVertical: 14,
+        borderRadius: 16,
+    },
+    closeBtnText: { color: '#000', fontWeight: '800', fontSize: 16 },
 });
