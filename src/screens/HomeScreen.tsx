@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share, Alert, Modal } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withDelay } from 'react-native-reanimated';
-import { supabase } from '../../lib/supabase';
 import { useMealplan } from '../context/MealplanContext';
 import { useCommunity } from '../context/CommunityContext';
 import { useNavigation } from '@react-navigation/native';
@@ -127,18 +126,6 @@ export default function HomeScreen() {
     const shoppingProgress = shoppingList.length === 0 ? 0 :
         (checkedIngredients.length / shoppingList.length) * 100;
 
-    const handleSharePlan = async () => {
-        if (!activePlan) return;
-        const lines = activePlan.days.map(day =>
-            `${DAY_NAMES[day.dayIndex]}:\n` +
-            day.meals.map(m => `  • ${m.recipe.title} (${m.recipe.calories} kcal)`).join('\n')
-        ).join('\n\n');
-        await Share.share({
-            message: `📅 MealFlex Wochenplan – Woche ${activePlan.weekNumber}\n\n${lines}`,
-            title: `Mealplan Woche ${activePlan.weekNumber}`,
-        });
-    };
-
     // Swap-Kandidaten: gespeicherte Community-Rezepte, dann alle, dann Fallback auf mockRecipes
     const swapCandidates = swapPool.length > 0
         ? swapPool
@@ -193,17 +180,6 @@ export default function HomeScreen() {
                             <Text style={styles.weekLabel}>Woche {activePlan.weekNumber}</Text>
                         </TouchableOpacity>
                     )}
-                </View>
-                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    {activePlan && (
-                        <TouchableOpacity onPress={handleSharePlan} style={styles.shareBtn}>
-                            <Ionicons name="share-outline" size={18} color="#FA4A0C" />
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.logoutBtn}>
-                        <Ionicons name="log-out-outline" size={16} color="#FA4A0C" />
-                        <Text style={styles.logoutText}>Ausloggen</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -432,9 +408,6 @@ const styles = StyleSheet.create({
     },
     greeting: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     weekLabel: { fontSize: 13, color: colors.muted, marginTop: 2 },
-    shareBtn: { padding: 8, borderRadius: 20, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
-    logoutBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
-    logoutText: { fontSize: 13, color: colors.primary, fontWeight: '700' },
 
     progressCard: {
         backgroundColor: colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 18,
