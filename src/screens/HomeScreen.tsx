@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Pressable, Share, Alert } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useMealplan } from '../context/MealplanContext';
 import { useCommunity } from '../context/CommunityContext';
@@ -9,6 +9,8 @@ import { MealSlot } from '../types/mealplan';
 import { SwipeDeckModal } from '../components/SwipeDeck';
 import { mockRecipes } from '../data/mockRecipes';
 import { useCalorie } from '../context/CalorieContext';
+import { aggregateShoppingList } from '../utils/ingredientParser';
+import { useSubscription } from '../context/SubscriptionContext';
 import { colors } from '../theme';
 
 const DAY_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -57,14 +59,26 @@ function MealCard({ meal, dayIndex, onSwap, onPress }: {
 }
 
 export default function HomeScreen() {
-    const { activePlan, swapMealWithRecipe } = useMealplan();
+    const { activePlan, swapMealWithRecipe, checkedIngredients, toggleShoppingItem } = useMealplan();
     const { getSwapQueueRecipes, swapQueueIds, communityRecipes } = useCommunity();
     const { getDayTotals, goals } = useCalorie();
+    const { requirePro } = useSubscription();
     const navigation = useNavigation<any>();
     const swapPool = getSwapQueueRecipes();
     const todayStr = new Date().toISOString().split('T')[0];
     const todayTotals = getDayTotals(todayStr);
     const [swapModal, setSwapModal] = useState<{ dayIndex: number; mealSlotId: string; dayName: string } | null>(null);
+    const [activeTab, setActiveTab] = useState<'plan' | 'shopping'>('plan');
+
+    const shoppingList = useMemo(() => {
+        if (!activePlan) return [];
+        const allIngredients = activePlan.days.flatMap(day =>
+            day.meals.flatMap(meal => meal.recipe.ingredients)
+        );
+        return aggregateShoppingList(allIngredients);
+    }, [activePlan]);
+    const shoppingProgress = shoppingList.length === 0 ? 0 :
+        (checkedIngredients.length / shoppingList.length) * 100;
 
     const handleSharePlan = async () => {
         if (!activePlan) return;
@@ -99,30 +113,107 @@ export default function HomeScreen() {
         ? Math.round(allMeals.reduce((s, m) => s + m.recipe.macros.carbs, 0) / activePlan!.days.length)
         : 0;
 
+    const handleBringExport = async () => {
+        if (!requirePro('Bring!-Export', () => navigation.navigate('Profile', { screen: 'Pricing' }))) return;
+        const unchecked = shoppingList.filter(
+            item => !checkedIngredients.includes(`${item.name}-${item.unit}`)
+        );
+        if (unchecked.length === 0) {
+            Alert.alert('Alles erledigt', 'Alle Artikel sind bereits abgehakt.');
+            return;
+        }
+        const text = unchecked
+            .map(item => `• ${item.amount} ${item.unit} ${item.name}`)
+            .join('\n');
+        try {
+            await Share.share({
+                message: `MealFlex Einkaufsliste\n\n${text}`,
+                title: 'MealFlex Einkaufsliste',
+            });
+        } catch {
+            Alert.alert('Fehler', 'Export konnte nicht gestartet werden.');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} bounces={true} alwaysBounceVertical={true}>
-
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.greeting}>Dein Wochenplan</Text>
-                        {activePlan && (
-                            <Text style={styles.weekLabel}>Woche {activePlan.weekNumber}</Text>
-                        )}
-                    </View>
-                    <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                        {activePlan && (
-                            <TouchableOpacity onPress={handleSharePlan} style={styles.shareBtn}>
-                                <Ionicons name="share-outline" size={18} color="#FA4A0C" />
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.logoutBtn}>
-                            <Ionicons name="log-out-outline" size={16} color="#FA4A0C" />
-                            <Text style={styles.logoutText}>Ausloggen</Text>
-                        </TouchableOpacity>
-                    </View>
+            {/* Header */}
+            <View style={styles.header}>
+                <View>
+                    <Text style={styles.greeting}>Dein Wochenplan</Text>
+                    {activePlan && (
+                        <Text style={styles.weekLabel}>Woche {activePlan.weekNumber}</Text>
+                    )}
                 </View>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                    {activePlan && (
+                        <TouchableOpacity onPress={handleSharePlan} style={styles.shareBtn}>
+                            <Ionicons name="share-outline" size={18} color="#FA4A0C" />
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.logoutBtn}>
+                        <Ionicons name="log-out-outline" size={16} color="#FA4A0C" />
+                        <Text style={styles.logoutText}>Ausloggen</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Segment Control */}
+            <View style={styles.segmentBar}>
+                <TouchableOpacity style={[styles.segBtn, activeTab === 'plan' && styles.segBtnActive]} onPress={() => setActiveTab('plan')}>
+                    <Text style={[styles.segBtnText, activeTab === 'plan' && styles.segBtnTextActive]}>Wochenplan</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.segBtn, activeTab === 'shopping' && styles.segBtnActive]} onPress={() => setActiveTab('shopping')}>
+                    <Text style={[styles.segBtnText, activeTab === 'shopping' && styles.segBtnTextActive]}>Einkauf</Text>
+                </TouchableOpacity>
+            </View>
+
+            {activeTab === 'shopping' ? (
+                <ScrollView style={styles.shopScroll} showsVerticalScrollIndicator={false}>
+                    {!activePlan || shoppingList.length === 0 ? (
+                        <View style={styles.shopEmpty}>
+                            <Ionicons name="cart-outline" size={64} color={colors.border} />
+                            <Text style={styles.shopEmptyText}>Deine Liste ist leer.</Text>
+                            <Text style={[styles.shopEmptyText, { fontSize: 14 }]}>Generiere erst einen Mealplan!</Text>
+                        </View>
+                    ) : (
+                        <>
+                            <Text style={styles.shopSubtitle}>
+                                Woche {activePlan.weekNumber} • {checkedIngredients.length} / {shoppingList.length} gekauft
+                            </Text>
+                            <View style={styles.shopProgress}>
+                                <View style={[styles.shopProgressFill, { width: `${shoppingProgress}%` as any }]} />
+                            </View>
+                            <TouchableOpacity style={styles.bringBtn} onPress={handleBringExport}>
+                                <Ionicons name="cart" size={16} color="#FFF" />
+                                <Text style={styles.bringBtnText}>Zu Bring! exportieren</Text>
+                            </TouchableOpacity>
+                            {shoppingList.map((item) => {
+                                const key = `${item.name}-${item.unit}`;
+                                const isChecked = checkedIngredients.includes(key);
+                                return (
+                                    <TouchableOpacity
+                                        key={key}
+                                        style={[styles.itemCard, isChecked && styles.itemCardChecked]}
+                                        onPress={() => toggleShoppingItem(key)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                                            {isChecked && <Ionicons name="checkmark" size={16} color="#FFF" />}
+                                        </View>
+                                        <View style={styles.itemInfo}>
+                                            <Text style={[styles.itemName, isChecked && styles.itemTextChecked]}>{item.name}</Text>
+                                            <Text style={[styles.itemAmount, isChecked && styles.itemTextChecked]}>{item.amount} {item.unit}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                            <View style={{ height: 32 }} />
+                        </>
+                    )}
+                </ScrollView>
+            ) : (
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} bounces={true} alwaysBounceVertical={true}>
 
                 {/* Stats Cards */}
                 {activePlan && (
@@ -238,6 +329,7 @@ export default function HomeScreen() {
 
                 <View style={{ height: 20 }} />
             </ScrollView>
+            )}
 
             {/* Tinder Swipe Deck für Rezept-Swap */}
             {swapModal && (

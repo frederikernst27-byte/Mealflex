@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, SafeAreaView,
     TextInput, Image, FlatList, Pressable, ActivityIndicator, RefreshControl,
@@ -159,13 +159,17 @@ export default function CommunityScreen() {
         activeFilters, setActiveFilters,
         getFilteredFeed, getAutosuggestions,
         isLoading, refreshFeed,
+        getSavedRecipes, savedRecipeIds,
+        addToSwapQueue, removeFromSwapQueue,
     } = useCommunity();
 
     const [inputValue, setInputValue] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeTab, setActiveTab] = useState<'feed' | 'saved'>('feed');
 
     const feed = getFilteredFeed();
+    const savedRecipes = useMemo(() => getSavedRecipes(), [getSavedRecipes, savedRecipeIds]);
 
     const handleRefresh = async () => {
         setRefreshing(true);
@@ -194,6 +198,54 @@ export default function CommunityScreen() {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            {/* Persistent top section */}
+            <View style={styles.header}>
+                <View>
+                    <Text style={styles.title}>Community</Text>
+                    <Text style={styles.subtitle}>{feed.length} Rezepte entdecken</Text>
+                </View>
+                {activeTab === 'feed' && (
+                    <TouchableOpacity
+                        style={styles.uploadBtn}
+                        onPress={() => navigation.navigate('RecipeUpload')}
+                    >
+                        <Ionicons name="add" size={22} color="#FFF" />
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            {/* Segment Control */}
+            <View style={styles.segmentBar}>
+                <TouchableOpacity
+                    style={[styles.segBtn, activeTab === 'feed' && styles.segBtnActive]}
+                    onPress={() => setActiveTab('feed')}
+                >
+                    <Text style={[styles.segBtnText, activeTab === 'feed' && styles.segBtnTextActive]}>Feed</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.segBtn, activeTab === 'saved' && styles.segBtnActive]}
+                    onPress={() => setActiveTab('saved')}
+                >
+                    <Text style={[styles.segBtnText, activeTab === 'saved' && styles.segBtnTextActive]}>Gespeichert</Text>
+                </TouchableOpacity>
+            </View>
+
+            {activeTab === 'saved' ? (
+                <FlatList
+                    data={savedRecipes}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) => <RecipeCard recipe={item} />}
+                    ListEmptyComponent={
+                        <View style={styles.empty}>
+                            <Text style={styles.emptyEmoji}>🔖</Text>
+                            <Text style={styles.emptyTitle}>Noch nichts gespeichert</Text>
+                            <Text style={styles.emptyText}>Noch nichts gespeichert – tippe auf 🔖 um Rezepte zu merken.</Text>
+                        </View>
+                    }
+                />
+            ) : (
             <FlatList
                 data={feed}
                 keyExtractor={item => item.id}
@@ -202,20 +254,6 @@ export default function CommunityScreen() {
                 keyboardShouldPersistTaps="handled"
                 ListHeaderComponent={
                     <View>
-                        {/* Header */}
-                        <View style={styles.header}>
-                            <View>
-                                <Text style={styles.title}>Community</Text>
-                                <Text style={styles.subtitle}>{feed.length} Rezepte entdecken</Text>
-                            </View>
-                            <TouchableOpacity
-                                style={styles.uploadBtn}
-                                onPress={() => navigation.navigate('RecipeUpload')}
-                            >
-                                <Ionicons name="add" size={22} color="#FFF" />
-                            </TouchableOpacity>
-                        </View>
-
                         {/* Search */}
                         <View style={styles.searchWrapper}>
                             <View style={styles.searchBar}>
@@ -314,6 +352,7 @@ export default function CommunityScreen() {
                     )
                 }
             />
+            )}
         </SafeAreaView>
     );
 }
@@ -425,4 +464,10 @@ const styles = StyleSheet.create({
     emptyEmoji: { fontSize: 52 },
     emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
     emptyText: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 20 },
+
+    segmentBar: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: colors.surfaceAlt, borderRadius: 12, padding: 3 },
+    segBtn: { flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
+    segBtnActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 2 },
+    segBtnText: { fontSize: 14, fontWeight: '600', color: colors.muted },
+    segBtnTextActive: { color: colors.text, fontWeight: '700' },
 });

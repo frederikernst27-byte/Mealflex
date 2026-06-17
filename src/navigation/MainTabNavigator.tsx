@@ -3,9 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
-import ShoppingListScreen from '../screens/ShoppingListScreen';
 import CommunityScreen from '../screens/CommunityScreen';
-import SavedRecipesScreen from '../screens/SavedRecipesScreen';
 import RecipeUploadScreen from '../screens/RecipeUploadScreen';
 import CalorieTrackerScreen from '../screens/CalorieTrackerScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -48,12 +46,8 @@ export default function MainTabNavigator() {
 
                     if (route.name === 'Home') {
                         iconName = focused ? 'home' : 'home-outline';
-                    } else if (route.name === 'ShoppingList') {
-                        iconName = focused ? 'cart' : 'cart-outline';
                     } else if (route.name === 'Community') {
                         iconName = focused ? 'people' : 'people-outline';
-                    } else if (route.name === 'Saved') {
-                        iconName = focused ? 'bookmark' : 'bookmark-outline';
                     } else if (route.name === 'Tracker') {
                         iconName = focused ? 'flame' : 'flame-outline';
                     } else if (route.name === 'Profile') {
@@ -74,9 +68,7 @@ export default function MainTabNavigator() {
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Wochenplan' }} />
             <Tab.Screen name="Tracker" component={CalorieTrackerScreen} options={{ title: 'Tracker' }} />
-<Tab.Screen name="Community" component={CommunityStackNavigator} options={{ title: 'Community' }} />
-            <Tab.Screen name="Saved" component={SavedRecipesScreen} options={{ title: 'Gespeichert' }} />
-            <Tab.Screen name="ShoppingList" component={ShoppingListScreen} options={{ title: 'Einkauf' }} />
+            <Tab.Screen name="Community" component={CommunityStackNavigator} options={{ title: 'Community' }} />
             <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ title: 'Profil' }} />
         </Tab.Navigator>
     );
