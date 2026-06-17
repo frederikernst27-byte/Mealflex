@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    Modal, TextInput, ActivityIndicator, Alert, Share,
+    Modal, TextInput, ActivityIndicator, Alert,
     KeyboardAvoidingView, Platform,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withDelay, withSequence } from 'react-native-reanimated';
@@ -326,22 +326,8 @@ export default function CalorieTrackerScreen() {
         });
     };
 
-    const handleExportCSV = async () => {
-        const header = 'Datum,Mahlzeit,Beschreibung,Kalorien,Protein_g,Carbs_g,Fett_g,Eisen_mg';
-        const rows = weekData.flatMap(d =>
-            getLogsForDate(d.date).map(l =>
-                `${l.log_date},${l.meal_type},"${(l.raw_text ?? '').replace(/"/g, '""')}",${Math.round(l.total_kcal)},${l.total_protein_g.toFixed(1)},${l.total_carbs_g.toFixed(1)},${l.total_fat_g.toFixed(1)},${l.total_iron_mg.toFixed(2)}`
-            )
-        ).join('\n');
-        await Share.share({
-            message: `${header}\n${rows || 'Keine Einträge in den letzten 7 Tagen'}`,
-            title: 'MealFlex Kalorienverlauf.csv',
-        });
-    };
-
     const kcalPct = Math.min(totals.kcal / Math.max(goals.daily_kcal_goal, 1), 1);
     const kcalColor = kcalPct > 1.1 ? '#FF3B30' : kcalPct > 0.9 ? '#34C759' : ORANGE;
-    const ironLow = totals.iron < goals.iron_goal_mg * 0.5;
 
     return (
         <View style={styles.container}>
@@ -349,10 +335,6 @@ export default function CalorieTrackerScreen() {
                 {/* Header */}
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Kalorien-Tracker</Text>
-                    <TouchableOpacity style={styles.exportBtn} onPress={handleExportCSV}>
-                        <Ionicons name="download-outline" size={18} color="#FA4A0C" />
-                        <Text style={styles.exportBtnText}>CSV</Text>
-                    </TouchableOpacity>
                 </View>
 
                 {/* Datumsnavigation */}
@@ -393,14 +375,6 @@ export default function CalorieTrackerScreen() {
                         </View>
                     </View>
 
-                    {/* Eisen-Indikator */}
-                    <View style={[styles.ironRow, ironLow && styles.ironRowLow]}>
-                        <Ionicons name="shield-checkmark" size={16} color={ironLow ? '#FF9500' : '#34C759'} />
-                        <Text style={[styles.ironLabel, ironLow && { color: '#FF9500' }]}>
-                            Eisen: {totals.iron.toFixed(1)} / {goals.iron_goal_mg}mg
-                            {ironLow && '  ⚠️ Zu wenig!'}
-                        </Text>
-                    </View>
                 </View>
 
                 {/* Wochendiagramm */}
@@ -472,9 +446,6 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     headerTitle: { fontSize: 28, fontWeight: '800', color: colors.text },
-    exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
-    exportBtnText: { fontSize: 13, color: colors.primary, fontWeight: '700' },
-
     // Date Nav
     dateNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 16 },
     dateArrow: { padding: 8, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
@@ -498,11 +469,6 @@ const styles = StyleSheet.create({
     macroValue: { fontSize: 12, fontWeight: '700' },
     macroTrack: { height: 6, backgroundColor: colors.surfaceAlt, borderRadius: 3, overflow: 'hidden' },
     macroFill: { height: 6, borderRadius: 3 },
-
-    // Iron
-    ironRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, padding: 10, backgroundColor: colors.successSoft, borderRadius: 10 },
-    ironRowLow: { backgroundColor: colors.warningSoft },
-    ironLabel: { fontSize: 13, color: colors.success, fontWeight: '600' },
 
     // Week Chart
     weekCard: { marginHorizontal: 16, marginBottom: 16, backgroundColor: colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.border },
